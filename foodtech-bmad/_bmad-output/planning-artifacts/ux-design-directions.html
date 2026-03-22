@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodTech — Design Direction Mockups</title>
+<style>
+  :root {
+    --bg-dark: #1A1D23;
+    --bg-light: #F8F9FB;
+    --surface-dark: #252830;
+    --surface-dark-2: #2D3039;
+    --primary: #3B82F6;
+    --primary-hover: #60A5FA;
+    --text-white: #FFFFFF;
+    --text-secondary: #9CA3AF;
+    --green: #10B981;
+    --amber: #F59E0B;
+    --red: #EF4444;
+    --slate: #64748B;
+    --border-dark: #374151;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #111; color: var(--text-white); }
+
+  /* Navigation */
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(17,17,17,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-dark); padding: 12px 24px; display: flex; align-items: center; gap: 16px; overflow-x: auto; }
+  .nav h1 { font-size: 16px; font-weight: 700; white-space: nowrap; color: var(--primary); }
+  .nav-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-dark); background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 13px; white-space: nowrap; transition: all 0.2s; }
+  .nav-btn:hover, .nav-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+  /* Sections */
+  .section { display: none; padding: 80px 24px 40px; min-height: 100vh; }
+  .section.active { display: block; }
+  .section-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .section-subtitle { font-size: 16px; color: var(--text-secondary); margin-bottom: 32px; }
+
+  /* Mockup containers */
+  .mockup-frame { background: var(--bg-dark); border-radius: 16px; border: 1px solid var(--border-dark); overflow: hidden; margin-bottom: 32px; }
+  .mockup-header { padding: 12px 16px; background: var(--surface-dark); border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; gap: 8px; }
+  .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .mockup-dot.r { background: var(--red); }
+  .mockup-dot.y { background: var(--amber); }
+  .mockup-dot.g { background: var(--green); }
+  .mockup-label { font-size: 12px; color: var(--text-secondary); margin-left: auto; }
+  .mockup-body { padding: 20px; }
+
+  /* Station View Mockup */
+  .station-view { max-width: 420px; margin: 0 auto; }
+  .station-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .station-name { font-size: 20px; font-weight: 700; }
+  .station-count { font-size: 14px; color: var(--text-secondary); }
+  .wifi-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; }
+
+  .ticket-card { background: var(--surface-dark); border-radius: 12px; padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--green); transition: all 0.3s; }
+  .ticket-card.warning { border-left-color: var(--amber); box-shadow: 0 0 12px rgba(245,158,11,0.15); }
+  .ticket-card.critical { border-left-color: var(--red); box-shadow: 0 0 20px rgba(239,68,68,0.2); animation: pulse-critical 1s ease-in-out infinite; }
+  .ticket-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .ticket-number { font-size: 24px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .ticket-time { font-size: 13px; color: var(--text-secondary); }
+  .ticket-time.warning { color: var(--amber); }
+  .ticket-time.critical { color: var(--red); font-weight: 600; }
+  .ticket-items { font-size: 15px; margin-bottom: 12px; line-height: 1.6; }
+  .ticket-items .item-86 { color: var(--red); text-decoration: line-through; }
+  .badge-86 { display: inline-block; background: var(--red); color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
+  .bump-btn { width: 100%; padding: 14px; border-radius: 8px; border: none; background: var(--primary); color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.15s; min-height: 48px; }
+  .bump-btn:hover { background: var(--primary-hover); transform: scale(1.01); }
+  .bump-btn:active { transform: scale(0.98); }
+
+  /* Expeditor Dashboard */
+  .expeditor-grid { display: grid; grid-template-columns: 1fr 1fr 300px; gap: 16px; }
+  @media (max-width: 900px) { .expeditor-grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--surface-dark); border-radius: 12px; padding: 16px; }
+  .panel-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+  /* Service Tempo */
+  .tempo-gauge { text-align: center; padding: 20px; }
+  .tempo-number { font-size: 64px; font-weight: 700; line-height: 1; }
+  .tempo-number.green { color: var(--green); }
+  .tempo-number.amber { color: var(--amber); }
+  .tempo-number.red { color: var(--red); }
+  .tempo-label { font-size: 14px; color: var(--text-secondary); margin-top: 8px; }
+  .tempo-bar { height: 6px; border-radius: 3px; background: var(--surface-dark-2); margin-top: 16px; overflow: hidden; }
+  .tempo-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+  .tempo-fill.green { background: var(--green); }
+  .tempo-fill.amber { background: var(--amber); }
+
+  /* Station Status Mini */
+  .station-mini { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; margin-bottom: 8px; transition: all 0.3s; }
+  .station-mini.healthy { opacity: 0.7; }
+  .station-mini.warning { opacity: 1; background: rgba(245,158,11,0.08); box-shadow: 0 0 8px rgba(245,158,11,0.1); }
+  .station-mini.critical { opacity: 1; background: rgba(239,68,68,0.08); box-shadow: 0 0 12px rgba(239,68,68,0.15); animation: pulse-critical 1s ease-in-out infinite; }
+  .status-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .status-dot.green { background: var(--green); }
+  .status-dot.amber { background: var(--amber); }
+  .status-dot.red { background: var(--red); }
+  .station-mini-name { font-size: 14px; font-weight: 500; }
+  .station-mini-count { font-size: 13px; color: var(--text-secondary); margin-left: auto; }
+
+  /* Customer Tracker */
+  .customer-tracker { max-width: 380px; margin: 0 auto; background: white; border-radius: 20px; color: #111; overflow: hidden; }
+  .ct-header { background: linear-gradient(135deg, var(--primary), #2563EB); color: white; padding: 24px; text-align: center; }
+  .ct-restaurant { font-size: 14px; opacity: 0.8; }
+  .ct-title { font-size: 20px; font-weight: 700; margin-top: 4px; }
+  .ct-body { padding: 24px; }
+  .ct-status { text-align: center; margin-bottom: 24px; }
+  .ct-status-text { font-size: 24px; font-weight: 700; color: var(--primary); }
+  .ct-status-sub { font-size: 14px; color: #6B7280; margin-top: 4px; }
+  .ct-progress { display: flex; align-items: center; gap: 0; margin-bottom: 24px; padding: 0 8px; }
+  .ct-step { flex: 1; text-align: center; position: relative; }
+  .ct-step-dot { width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .ct-step-dot.done { background: var(--green); color: white; }
+  .ct-step-dot.active { background: var(--primary); color: white; animation: pulse-soft 2s ease-in-out infinite; }
+  .ct-step-dot.pending { background: #E5E7EB; color: #9CA3AF; }
+  .ct-step-label { font-size: 11px; color: #6B7280; }
+  .ct-step-label.active { color: var(--primary); font-weight: 600; }
+  .ct-eta { background: #F3F4F6; border-radius: 12px; padding: 16px; text-align: center; }
+  .ct-eta-label { font-size: 13px; color: #6B7280; }
+  .ct-eta-time { font-size: 32px; font-weight: 700; color: #111; }
+  .ct-eta-unit { font-size: 14px; color: #6B7280; }
+
+  /* Delivery Board */
+  .delivery-board { max-width: 420px; margin: 0 auto; }
+  .delivery-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-dark); border-radius: 12px; margin-bottom: 10px; }
+  .delivery-eta { text-align: center; min-width: 60px; }
+  .delivery-eta-num { font-size: 28px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .delivery-eta-num.ready { color: var(--green); }
+  .delivery-eta-num.soon { color: var(--amber); }
+  .delivery-eta-label { font-size: 11px; color: var(--text-secondary); }
+  .delivery-info { flex: 1; }
+  .delivery-order { font-size: 16px; font-weight: 600; }
+  .delivery-items { font-size: 13px; color: var(--text-secondary); }
+  .delivery-pickup-btn { padding: 10px 20px; border-radius: 8px; border: none; background: var(--green); color: white; font-weight: 600; cursor: pointer; font-size: 14px; min-height: 44px; }
+
+  /* Supplier Portal */
+  .supplier-portal { background: var(--bg-light); border-radius: 12px; color: #111; padding: 24px; }
+  .sp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .sp-title { font-size: 20px; font-weight: 700; }
+  .sp-badge { background: var(--amber); color: white; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+  .sp-table { width: 100%; border-collapse: collapse; }
+  .sp-table th { text-align: left; padding: 10px 12px; font-size: 12px; text-transform: uppercase; color: #6B7280; border-bottom: 2px solid #E5E7EB; }
+  .sp-table td { padding: 12px; border-bottom: 1px solid #F3F4F6; font-size: 14px; }
+  .sp-table tr:hover { background: #F9FAFB; }
+  .sp-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .sp-status.auto { background: #FEF3C7; color: #92400E; }
+  .sp-status.confirmed { background: #D1FAE5; color: #065F46; }
+  .sp-status.pending { background: #E0E7FF; color: #3730A3; }
+  .sp-batch-btn { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+  .sp-checkbox { width: 18px; height: 18px; accent-color: var(--primary); }
+
+  /* Comparison Grid */
+  .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; }
+
+  /* Animations */
+  @keyframes pulse-critical { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
+  @keyframes pulse-soft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+  /* Direction Labels */
+  .direction-tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
+  .direction-tag.chosen { background: var(--green); color: white; }
+  .direction-tag.alt { background: var(--surface-dark); color: var(--text-secondary); border: 1px solid var(--border-dark); }
+
+  /* Notes */
+  .design-note { background: var(--surface-dark); border-left: 3px solid var(--primary); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 14px; color: var(--text-secondary); }
+  .design-note strong { color: var(--text-white); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <h1>FoodTech UX</h1>
+  <button class="nav-btn active" onclick="showSection('overview')">Overview</button>
+  <button class="nav-btn" onclick="showSection('station')">Station View</button>
+  <button class="nav-btn" onclick="showSection('expeditor')">Expeditor Dashboard</button>
+  <button class="nav-btn" onclick="showSection('customer')">Customer Tracker</button>
+  <button class="nav-btn" onclick="showSection('delivery')">Delivery Board</button>
+  <button class="nav-btn" onclick="showSection('supplier')">Supplier Portal</button>
+  <button class="nav-btn" onclick="showSection('attention')">Attention-Driven UI</button>
+  <button class="nav-btn" onclick="showSection('compare')">Compare All</button>
+</nav>
+
+<!-- OVERVIEW -->
+<div id="overview" class="section active">
+  <h2 class="section-title">FoodTech Design Directions</h2>
+  <p class="section-subtitle">Explore 7 purpose-built views, each designed for its persona's environment, device, and mental model.</p>
+
+  <div class="design-note">
+    <strong>Design Philosophy:</strong> "One tap, many ripples." Each view is purpose-built for its persona — not a filtered version of a generic dashboard. Kitchen views use dark theme with large touch targets. Office views use light theme with dense layouts. Mobile views are minimal and glanceable.
+  </div>
+
+  <div class="two-col" style="margin-top: 24px;">
+    <div>
+      <h3 style="margin-bottom: 12px; font-size: 18px;">Kitchen Views (Dark Theme)</h3>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">Dark backgrounds reduce glare under bright kitchen lighting. Large touch targets (48dp+) work with wet/gloved hands. High contrast status colors are visible from across the kitchen. Attention-driven UI: problems glow, healthy operations fade.</p>
+    </div>
+    <div>
+      <h3 style="margin-bottom: 12px; font-size: 18px;">Office & Mobile Views (Light Theme)</h3>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">Clean white backgrounds for focused desktop work. Dense data tables for supplier batch operations. Mobile-optimized customer tracker — one screen, instant comprehension. Standard web conventions for management and admin views.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STATION VIEW -->
+<div id="station" class="section">
+  <h2 class="section-title">Station View — Line Cook Interface</h2>
+  <p class="section-subtitle">Marco's view: my orders, bump button, zero learning curve. Tablet-first, touch-optimized, offline-capable.</p>
+
+  <div class="comparison-grid">
+    <!-- Direction A: Minimal Stack -->
+    <div>
+      <span class="direction-tag chosen">Direction A — Chosen: Minimal Stack</span>
+      <div class="mockup-frame">
+        <div class="mockup-header">
+          <span class="mockup-dot r"></span><span class="mockup-dot y"></span><span class="mockup-dot g"></span>
+          <span class="mockup-label">Android Tablet 10" — Portrait</span>
+        </div>
+        <div class="mockup-body station-view">
+          <div class="station-header">
+            <div>
+              <div class="station-name">🔥 Grill Station</div>
+              <div class="station-count">4 orders · <span class="wifi-indicator"></span> Connected</div>
+            </div>
+          </div>
+
+          <div class="ticket-card critical">
+            <div class="ticket-top">
+              <span class="ticket-number">#47</span>
+              <span class="ticket-time critical">⚠ 8:42</span>
+            </div>
+            <div class="ticket-items">
+              1× Ribeye Medium-Rare<br>
+              1× <span class="item-86">Salmon Risotto</span> <span class="badge-86">86'd</span>
+            </div>
+            <button class="bump-btn">BUMP →</button>
+          </div>
+
+          <div class="ticket-card warning">
+            <div class="ticket-top">
+              <span class="ticket-number">#48</span>
+              <span class="ticket-time warning">⚠ 5:15</span>
+            </div>
+            <div class="ticket-items">
+              2× Chicken Parm<br>
+              1× Grilled Vegetables
+            </div>
+            <button class="bump-btn">BUMP →</button>
+          </div>
+
+          <div class="ticket-card">
+            <div class="ticket-top">
+              <span class="ticket-number">#51</span>
+              <span class="ticket-time">1:30</span>
+            </div>
+            <div class="ticket-items">
+              1× Burger Medium<br>
+              1× Truffle Fries
+            </div>
+            <button class="bump-btn">BUMP →</button>
+          </div>
+
+          <div class="ticket-card" style="opacity: 0.7;">
+            <div class="ticket-top">
+              <span class="ticket-number">#53</span>
+              <span class="ticket-time">0:20</span>
+            </div>
+            <div class="ticket-items">
+              1× NY Strip Well-Done
+            </div>
+            <button class="bump-btn">BUMP →</button>
+          </div>
+        </div>
+      </div>
+      <div class="design-note"><strong>Why this direction:</strong> Single column, stacked cards, full-width bump buttons. Oldest/most urgent tickets at top with visual urgency (border color + glow). 86'd items visible inline with strikethrough + red badge. Zero navigation, zero menus. Designed for wet hands on a budget tablet.</div>
+    </div>
+
+    <!-- Direction B: Kanban Columns -->
+    <div>
+      <span class="direction-tag alt">Direction B — Kanban Columns</span>
+      <div class="mockup-frame">
+        <div class="mockup-header">
+          <span class="mockup-dot r"></span><span class="mockup-dot y"></span><span class="mockup-dot g"></span>
+          <span class="mockup-label">iPad — Landscape</span>
+        </div>
+        <div class="mockup-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+            <div>
+              <div class="panel-title" style="color: var(--amber);">⏳ Preparing (3)</div>
+              <div class="ticket-card warning" style="padding: 12px;">
+                <div style="font-size: 18px; font-weight: 700;">#47</div>
+                <div style="font-size: 13px; margin: 4px 0;">Ribeye MR</div>
+                <div style="font-size: 12px; color: var(--amber);">8:42</div>
+              </div>
+              <div class="ticket-card" style="padding: 12px;">
+                <div style="font-size: 18px; font-weight: 700;">#48</div>
+                <div style="font-size: 13px; margin: 4px 0;">2× Chicken Parm</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">5:15</div>
+              </div>
+              <div class="ticket-card" style="padding: 12px;">
+                <div style="font-size: 18px; font-weight: 700;">#51</div>
+                <div style="font-size: 13px; margin: 4px 0;">Burger M</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">1:30</div>
+              </div>
+            </div>
+            <div>
+              <div class="panel-title" style="color: var(--primary);">🍽 Plating (1)</div>
+              <div class="ticket-card" style="padding: 12px; border-left-color: var(--primary);">
+                <div style="font-size: 18px; font-weight: 700;">#45</div>
+                <div style="font-size: 13px; margin: 4px 0;">Pasta Carbonara</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">0:45</div>
+              </div>
+            </div>
+            <div>
+              <div class="panel-title" style="color: var(--green);">✓ Served (5)</div>
+              <div style="opacity: 0.5;">
+                <div class="ticket-card" style="padding: 12px; border-left-color: var(--slate);">
+                  <div style="font-size: 18px; font-weight: 700;">#42</div>
+                  <div style="font-size: 12px; color: var(--text-secondary);">Done</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="design-note"><strong>Why not this direction:</strong> Better for iPads in landscape, but fails on 7" portrait tablets. Columns get too narrow for readable content. Also requires horizontal scanning — less efficient for a cook who just needs "what's next." Reserved for Expeditor Dashboard where spatial overview has value.</div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPEDITOR DASHBOARD -->
+<div id="expeditor" class="section">
+  <h2 class="section-title">Expeditor Dashboard — Command Center</h2>
+  <p class="section-subtitle">Adrienne's view: full operational awareness. Attention-driven UI surfaces problems, dims what's flowing.</p>
+
+  <span class="direction-tag chosen">Direction: 3-Panel Command Center</span>
+  <div class="mockup-frame">
+    <div class="mockup-header">
+      <span class="mockup-dot r"></span><span class="mockup-dot y"></span><span class="mockup-dot g"></span>
+      <span class="mockup-label">Wall-mounted TV 55" or iPad Pro Landscape</span>
+    </div>
+    <div class="mockup-body">
+      <div class="expeditor-grid">
+        <!-- Left: The Rail -->
+        <div class="panel">
+          <div class="panel-title">The Rail — Live Orders</div>
+          <div class="ticket-card critical" style="padding: 10px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-weight: 700;">#47 <span style="font-size: 12px; color: var(--red);">! 8:42</span></span>
+              <span style="font-size: 12px; color: var(--text-secondary);">Grill</span>
+            </div>
+            <div style="font-size: 13px; margin-top: 4px;">Ribeye MR, ~~Salmon~~ 86'd</div>
+          </div>
+          <div class="ticket-card warning" style="padding: 10px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-weight: 700;">#48 <span style="font-size: 12px; color: var(--amber);">⚠ 5:15</span></span>
+              <span style="font-size: 12px; color: var(--text-secondary);">Grill</span>
+            </div>
+            <div style="font-size: 13px; margin-top: 4px;">2× Chicken Parm, Grilled Veg</div>
+          </div>
+          <div class="ticket-card" style="padding: 10px; opacity: 0.7;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-weight: 700;">#49</span>
+              <span style="font-size: 12px; color: var(--text-secondary);">Sauté</span>
+            </div>
+            <div style="font-size: 13px; margin-top: 4px;">Pasta Primavera</div>
+          </div>
+          <div class="ticket-card" style="padding: 10px; opacity: 0.7;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-weight: 700;">#50</span>
+              <span style="font-size: 12px; color: var(--text-secondary);">Cold</span>
+            </div>
+            <div style="font-size: 13px; margin-top: 4px;">Caesar Salad, Bruschetta</div>
+          </div>
+          <div class="ticket-card" style="padding: 10px; opacity: 0.7;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-weight: 700;">#51</span>
+              <span style="font-size: 12px; color: var(--text-secondary);">Grill</span>
+            </div>
+            <div style="font-size: 13px; margin-top: 4px;">Burger M, Truffle Fries</div>
+          </div>
+        </div>
+
+        <!-- Center: Station Status -->
+        <div class="panel">
+          <div class="panel-title">Kitchen Status</div>
+          <div class="station-mini critical">
+            <span class="status-dot red"></span>
+            <span class="station-mini-name">🔥 Grill</span>
+            <span class="station-mini-count" style="color: var(--red);">6 tickets · ! Backed up</span>
+          </div>
+          <div class="station-mini warning">
+            <span class="status-dot amber"></span>
+            <span class="station-mini-name">🍳 Sauté</span>
+            <span class="station-mini-count" style="color: var(--amber);">4 tickets · ⚠ Watch</span>
+          </div>
+          <div class="station-mini healthy">
+            <span class="status-dot green"></span>
+            <span class="station-mini-name">🥗 Cold</span>
+            <span class="station-mini-count">2 tickets · ✓ Flowing</span>
+          </div>
+          <div class="station-mini healthy">
+            <span class="status-dot green"></span>
+            <span class="station-mini-name">🍰 Pastry</span>
+            <span class="station-mini-count">1 ticket · ✓ Flowing</span>
+          </div>
+          <div class="station-mini healthy">
+            <span class="status-dot green"></span>
+            <span class="station-mini-name">🥤 Drinks</span>
+            <span class="station-mini-count">0 tickets · ✓ Clear</span>
+          </div>
+
+          <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-dark);">
+            <div class="panel-title">86 Board</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <span style="background: rgba(239,68,68,0.15); color: var(--red); padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;">! Salmon</span>
+              <span style="background: rgba(245,158,11,0.15); color: var(--amber); padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;">⚠ Arugula (low)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Service Tempo -->
+        <div class="panel">
+          <div class="panel-title">Service Tempo</div>
+          <div class="tempo-gauge">
+            <div class="tempo-number amber">7.2</div>
+            <div class="tempo-label">avg minutes per ticket</div>
+            <div class="tempo-bar">
+              <div class="tempo-fill amber" style="width: 65%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: var(--text-secondary);">
+              <span style="color: var(--green);">Target: 5m</span>
+              <span style="color: var(--red);">Critical: 12m</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-dark);">
+            <div class="panel-title">Tonight's Stats</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px;">
+              <div><span style="color: var(--text-secondary);">Served</span><br><strong>34</strong></div>
+              <div><span style="color: var(--text-secondary);">In Progress</span><br><strong>13</strong></div>
+              <div><span style="color: var(--text-secondary);">Avg Time</span><br><strong>6.8m</strong></div>
+              <div><span style="color: var(--text-secondary);">Peak</span><br><strong style="color: var(--amber);">8:30 PM</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="design-note"><strong>Attention-driven UI in action:</strong> Notice how Grill (critical) and Sauté (warning) are visually prominent with glow effects, while Cold, Pastry, and Drinks fade to 70% opacity. Adrienne's eyes are drawn to problems without scanning. The Rail shows the same pattern — urgent tickets glow, flowing tickets recede.</div>
+</div>
+
+<!-- CUSTOMER TRACKER -->
+<div id="customer" class="section">
+  <h2 class="section-title">Customer Tracker — Order Transparency</h2>
+  <p class="section-subtitle">Priya's view: scan QR, see status. No app, no login, no friction. Mobile-first, one-screen design.</p>
+
+  <div class="comparison-grid">
+    <div>
+      <span class="direction-tag chosen">Direction A — Progress Steps</span>
+      <div class="mockup-frame" style="background: #F3F4F6;">
+        <div class="mockup-header" style="background: #E5E7EB; border-color: #D1D5DB;">
+          <span class="mockup-dot r"></span><span class="mockup-dot y"></span><span class="mockup-dot g"></span>
+          <span class="mockup-label" style="color: #6B7280;">iPhone — Safari</span>
+        </div>
+        <div class="mockup-body" style="background: #F3F4F6; padding: 20px;">
+          <div class="customer-tracker">
+            <div class="ct-header">
+              <div class="ct-restaurant">Bella's Trattoria</div>
+              <div class="ct-title">Order #47</div>
+            </div>
+            <div class="ct-body">
+              <div class="ct-status">
+                <div class="ct-status-text">🍳 Preparing</div>
+                <div class="ct-status-sub">Your order is being made</div>
+              </div>
+
+              <div class="ct-progress">
+                <div class="ct-step">
+                  <div class="ct-step-dot done">✓</div>
+                  <div class="ct-step-label">Received</div>
+                </div>
+                <div class="ct-step">
+                  <div class="ct-step-dot active">2</div>
+                  <div class="ct-step-label active">Preparing</div>
+                </div>
+                <div class="ct-step">
+                  <div class="ct-step-dot pending">3</div>
+                  <div class="ct-step-label">Plating</div>
+                </div>
+                <div class="ct-step">
+                  <div class="ct-step-dot pending">4</div>
+                  <div class="ct-step-label">Ready</div>
+                </div>
+              </div>
+
+              <div class="ct-eta">
+                <div class="ct-eta-label">Estimated ready in</div>
+                <div class="ct-eta-time">~8 <span class="ct-eta-unit">min</span></div>
+              </div>
+
+              <div style="margin-top: 16px; text-align: center; font-size: 13px; color: #9CA3AF;">
+                Auto-updates in real time · No refresh needed
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="design-note"><strong>Why this direction:</strong> Clean, calm, instantly comprehensible. Progress steps mirror the familiar package-tracking mental model (Amazon, FedEx). The active step pulses subtly to signal "this is live." ETA is the anchor — the one number Priya cares about most.</div>
+    </div>
+
+    <div>
+      <span class="direction-tag alt">Direction B — Minimal Card</span>
+      <div class="mockup-frame" style="background: #F3F4F6;">
+        <div class="mockup-header" style="background: #E5E7EB; border-color: #D1D5DB;">
+          <span class="mockup-dot r"></span><span class="mockup-dot y"></span><span class="mockup-dot g"></span>
+          <span class="mockup-label" style="color: #6B7280;">Android — Chrome</span>
+        </div>
+        <div class="mockup-body" style="background: #F3F4F6; padding: 20px;">
+          <div style="max-width: 380px; margin: 0 auto; background: white; border-radius: 20px; padding: 32px; text-align: center; color: #111;">
+            <div style="font-size: 14px; color: #6B7280;">Bella's Trattoria</div>
+            <div style="font-size: 48px; margin: 16px 0;">🍳</div>
+            <div style="font-size: 28px; font-weight: 700; color: var(--primary);">Preparing</div>
+            <div style="font-size: 16px; color: #6B7280; margin-top: 8px;">Your poke bowl is being made</div>
+            <div style="margin: 24px 0;">
+              <div style="height: 8px; background: #E5E7EB; border-radius: 4px; overflow: hidden;">
+                <div style="width: 50%; height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.5s;"></div>
+              </div>
+            </div>
+            <div style="font-size: 40px; font-weight: 700;">~8 min</div>
+            <div style="font-size: 14px; color: #6B7280;">until ready</div>
+          </div>
+        </div>
+      </div>
+      <div class="design-note"><strong>Alternative:</strong> Even more minimal — single emoji + status + progress bar + ETA. Could work as a "glance-and-go" design. Less informative than Direction A (no stage breakdown) but faster to parse in under 2 seconds. Could be a good option for delivery/pickup contexts where speed matters most.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DELIVERY BOARD -->
+<div id="delivery" class="section">
+  <h2 class="section-title">Delivery Board — Partner Optimization</h2>
+  <p class="section-subtitle">Jason's view: glanceable ETAs, ready-order queue, one-tap pickup confirmation.</p>
+
+  <span class="direction-tag chosen">Direction: Countdown Queue</span>
+  <div class="mockup-frame">
+    <div class="mockup-header">
+      <span class="mockup-dot r"></span><span class="mockup-dot y"></span><span class="mockup-dot g"></span>
+      <span class="mockup-label">Mobile Phone — Portrait</span>
+    </div>
+    <div class="mockup-body">
+      <div class="delivery-board">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <div style="font-size: 18px; font-weight: 700;">Bella's Trattoria</div>
+            <div style="font-size: 13px; color: var(--text-secondary);">3 orders ready or upcoming</div>
+          </div>
+        </div>
+
+        <div class="delivery-item" style="border: 1px solid var(--green);">
+          <div class="delivery-eta">
+            <div class="delivery-eta-num ready">NOW</div>
+            <div class="delivery-eta-label">Ready</div>
+          </div>
+          <div class="delivery-info">
+            <div class="delivery-order">#45 — DoorDash</div>
+            <div class="delivery-items">Pasta Carbonara, Tiramisu</div>
+          </div>
+          <button class="delivery-pickup-btn">Pick Up</button>
+        </div>
+
+        <div class="delivery-item">
+          <div class="delivery-eta">
+            <div class="delivery-eta-num soon">3m</div>
+            <div class="delivery-eta-label">Plating</div>
+          </div>
+          <div class="delivery-info">
+            <div class="delivery-order">#47 — Uber Eats</div>
+            <div class="delivery-items">Ribeye MR, Truffle Fries</div>
+          </div>
+        </div>
+
+        <div class="delivery-item" style="opacity: 0.7;">
+          <div class="delivery-eta">
+            <div class="delivery-eta-num" style="color: var(--text-secondary);">11m</div>
+            <div class="delivery-eta-label">Preparing</div>
+          </div>
+          <div class="delivery-info">
+            <div class="delivery-order">#51 — Walk-in pickup</div>
+            <div class="delivery-items">Burger M, Caesar Salad</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="design-note"><strong>Design rationale:</strong> Large countdown numbers (28px monospace) are the primary visual element — Jason sees the time first, details second. Ready orders get a green border and "Pick Up" button. Upcoming orders fade with attention-driven opacity. The board is sorted by readiness, not order number.</div>
+</div>
+
+<!-- SUPPLIER PORTAL -->
+<div id="supplier" class="section">
+  <h2 class="section-title">Supplier Portal — Demand Dashboard</h2>
+  <p class="section-subtitle">Linda's view: multi-client demand overview, auto-reorder management, batch operations. Desktop-optimized, light theme.</p>
+
+  <span class="direction-tag chosen">Direction: Data Table + Batch Actions</span>
+  <div class="mockup-frame" style="background: var(--bg-light);">
+    <div class="mockup-header" style="background: #E5E7EB; border-color: #D1D5DB;">
+      <span class="mockup-dot r"></span><span class="mockup-dot y"></span><span class="mockup-dot g"></span>
+      <span class="mockup-label" style="color: #6B7280;">Desktop — Chrome</span>
+    </div>
+    <div class="mockup-body" style="padding: 0;">
+      <div class="supplier-portal">
+        <div class="sp-header">
+          <div>
+            <div class="sp-title">Pending Orders</div>
+            <div style="font-size: 13px; color: #6B7280;">4 orders across 3 restaurants</div>
+          </div>
+          <span class="sp-badge">4 pending</span>
+        </div>
+
+        <table class="sp-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" class="sp-checkbox"></th>
+              <th>Restaurant</th>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Type</th>
+              <th>Deliver By</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" class="sp-checkbox" checked></td>
+              <td style="font-weight: 600;">Bella's Trattoria</td>
+              <td>Fresh Mozzarella</td>
+              <td>20 lbs</td>
+              <td><span class="sp-status auto">⚡ Auto-reorder</span></td>
+              <td>Tomorrow 6 AM</td>
+              <td><span class="sp-status pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="sp-checkbox" checked></td>
+              <td style="font-weight: 600;">Tony's Pizza #1</td>
+              <td>San Marzano Tomatoes</td>
+              <td>4 cases</td>
+              <td><span class="sp-status auto">⚡ Auto-reorder</span></td>
+              <td>Tomorrow 6 AM</td>
+              <td><span class="sp-status pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="sp-checkbox" checked></td>
+              <td style="font-weight: 600;">Tony's Pizza #2</td>
+              <td>Fresh Basil</td>
+              <td>10 bunches</td>
+              <td><span class="sp-status auto">⚡ Auto-reorder</span></td>
+              <td>Tomorrow 7 AM</td>
+              <td><span class="sp-status pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="sp-checkbox"></td>
+              <td style="font-weight: 600;">Casa Verde</td>
+              <td>Avocados</td>
+              <td>2 cases</td>
+              <td><span class="sp-status auto">⚡ Auto-reorder</span></td>
+              <td>Tomorrow 8 AM</td>
+              <td><span class="sp-status confirmed">✓ Confirmed</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="display: flex; gap: 12px; align-items: center; margin-top: 16px;">
+          <button class="sp-batch-btn">✓ Confirm Selected (3)</button>
+          <button class="sp-batch-btn" style="background: transparent; border: 1px solid #D1D5DB; color: #374151;">Batch Route</button>
+          <span style="font-size: 13px; color: #6B7280; margin-left: auto;">3 of 4 selected</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="design-note"><strong>Design rationale:</strong> Light theme for office/desktop context. Data table with checkboxes for batch selection. Auto-reorder triggers are clearly labeled. Batch confirm and routing buttons enable Linda's primary workflow: select orders → confirm → route. Dense but organized.</div>
+</div>
+
+<!-- ATTENTION-DRIVEN UI -->
+<div id="attention" class="section">
+  <h2 class="section-title">Attention-Driven UI System</h2>
+  <p class="section-subtitle">The core UX innovation: problems glow, healthy operations fade. Information finds you.</p>
+
+  <div class="design-note" style="margin-bottom: 24px;">
+    <strong>How it works:</strong> Every entity on screen (station, ticket, order) has an attention state. Healthy items reduce opacity to 70% and have no animation. Warning items return to full opacity with a slow pulse (2s cycle) and subtle glow. Critical items add a faster pulse (1s) and brighter glow. The result: your eye is naturally drawn to what needs attention without active scanning.
+  </div>
+
+  <div class="comparison-grid">
+    <div>
+      <h3 style="margin-bottom: 12px;">Healthy State (opacity: 0.7, no animation)</h3>
+      <div class="station-mini healthy">
+        <span class="status-dot green"></span>
+        <span class="station-mini-name">🥗 Cold Station</span>
+        <span class="station-mini-count">2 tickets · ✓ Flowing</span>
+      </div>
+      <div class="station-mini healthy">
+        <span class="status-dot green"></span>
+        <span class="station-mini-name">🍰 Pastry Station</span>
+        <span class="station-mini-count">1 ticket · ✓ Flowing</span>
+      </div>
+      <div class="station-mini healthy">
+        <span class="status-dot green"></span>
+        <span class="station-mini-name">🥤 Drinks</span>
+        <span class="station-mini-count">0 tickets · ✓ Clear</span>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-bottom: 12px;">Warning + Critical (full opacity, glow, pulse)</h3>
+      <div class="station-mini warning">
+        <span class="status-dot amber"></span>
+        <span class="station-mini-name">🍳 Sauté Station</span>
+        <span class="station-mini-count" style="color: var(--amber);">4 tickets · ⚠ Watch</span>
+      </div>
+      <div class="station-mini critical">
+        <span class="status-dot red"></span>
+        <span class="station-mini-name">🔥 Grill Station</span>
+        <span class="station-mini-count" style="color: var(--red);">6 tickets · ! Backed up</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 32px;">
+    <h3 style="margin-bottom: 12px;">Ticket Cards — Same Pattern</h3>
+    <div style="max-width: 400px;">
+      <div class="ticket-card" style="opacity: 0.7;">
+        <div class="ticket-top">
+          <span class="ticket-number">#53</span>
+          <span class="ticket-time">0:20</span>
+        </div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Healthy — recently received, on track</div>
+      </div>
+      <div class="ticket-card warning">
+        <div class="ticket-top">
+          <span class="ticket-number">#48</span>
+          <span class="ticket-time warning">⚠ 5:15</span>
+        </div>
+        <div style="font-size: 13px; color: var(--amber);">Warning — aging, approaching threshold</div>
+      </div>
+      <div class="ticket-card critical">
+        <div class="ticket-top">
+          <span class="ticket-number">#47</span>
+          <span class="ticket-time critical">! 8:42</span>
+        </div>
+        <div style="font-size: 13px; color: var(--red);">Critical — overdue, needs immediate attention</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARE ALL -->
+<div id="compare" class="section">
+  <h2 class="section-title">All Views — Side by Side</h2>
+  <p class="section-subtitle">Seven purpose-built experiences. One platform. Same data, different lenses.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+    <div style="text-align: center;">
+      <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--primary);">Station View</div>
+      <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Dark · Tablet · Touch · 48dp targets</div>
+      <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; border: 1px solid var(--border-dark);">
+        <div class="ticket-card" style="padding: 8px; margin-bottom: 6px; font-size: 12px;">
+          <div style="font-weight: 700;">#47 · Ribeye MR</div>
+          <div style="background: var(--primary); color: white; text-align: center; padding: 6px; border-radius: 4px; margin-top: 4px; font-size: 11px;">BUMP →</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--primary);">Expeditor Dashboard</div>
+      <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Dark · TV/iPad · Display · 3-panel</div>
+      <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; border: 1px solid var(--border-dark); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
+        <div style="background: var(--surface-dark); padding: 6px; border-radius: 4px; font-size: 10px;">Rail</div>
+        <div style="background: var(--surface-dark); padding: 6px; border-radius: 4px; font-size: 10px;">Status</div>
+        <div style="background: var(--surface-dark); padding: 6px; border-radius: 4px; font-size: 10px; text-align: center;"><span style="color: var(--amber); font-size: 18px; font-weight: 700;">7.2</span></div>
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--primary);">Customer Tracker</div>
+      <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Light · Mobile · No login · 1 screen</div>
+      <div style="background: white; padding: 12px; border-radius: 8px; color: #111; text-align: center;">
+        <div style="font-size: 16px; font-weight: 700; color: var(--primary);">🍳 Preparing</div>
+        <div style="font-size: 24px; font-weight: 700; margin-top: 4px;">~8 min</div>
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--primary);">Delivery Board</div>
+      <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Dark · Mobile · Glanceable · Countdown</div>
+      <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; border: 1px solid var(--border-dark);">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+          <span style="font-size: 20px; font-weight: 700; color: var(--green); font-family: monospace;">NOW</span>
+          <span>#45 — Pick Up</span>
+        </div>
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--primary);">Supplier Portal</div>
+      <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Light · Desktop · Data tables · Batch</div>
+      <div style="background: white; padding: 12px; border-radius: 8px; color: #111; font-size: 11px;">
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="checkbox" checked style="accent-color: var(--primary);">
+          <span>Bella's · Mozzarella · 20 lbs</span>
+        </div>
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--primary);">Management Console</div>
+      <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Light · Desktop · Drill-down · Analytics</div>
+      <div style="background: white; padding: 12px; border-radius: 8px; color: #111; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; font-size: 10px;">
+        <div style="background: #F3F4F6; padding: 6px; border-radius: 4px; text-align: center;"><span style="color: var(--green);">●</span> Loc 1</div>
+        <div style="background: #F3F4F6; padding: 6px; border-radius: 4px; text-align: center;"><span style="color: var(--amber);">●</span> Loc 2</div>
+        <div style="background: #F3F4F6; padding: 6px; border-radius: 4px; text-align: center;"><span style="color: var(--green);">●</span> Loc 3</div>
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--primary);">Admin Console</div>
+      <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Light · Desktop · Wizards · Config</div>
+      <div style="background: white; padding: 12px; border-radius: 8px; color: #111; font-size: 11px;">
+        <div style="background: #F3F4F6; padding: 6px 10px; border-radius: 4px;">Step 1: Configure Stations →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
