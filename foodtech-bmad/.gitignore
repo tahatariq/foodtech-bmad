@@ -1,0 +1,80 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+dist/
+build/
+out/
+*.tsbuildinfo
+coverage/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+.c9/
+
+# Runtime
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# BMAD Framework (do not commit generated artifacts)
+
+_bmad_cache/
+
+# Frontend specific (if using common frameworks)
+.next/
+.nuxt/
+dist-ssr/
+.vuepress/dist
+
+# API/Backend specific
+tmp/
+temp/
+*.pid
+.cache/
+
+# Testing
+.mocha
+.nyc_output/
+jest_0*/
+
+# Local development
+.local/
+docker-compose.override.yml
+.claude/
+claude_dev.log
+.claud*
+
+# BMAD Framework directories
+_bmad/
+_bmad_memory/
+_bmad_cache/
+bmad-artifacts/
+
+.github/skills/
