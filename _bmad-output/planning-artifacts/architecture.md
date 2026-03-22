@@ -1,7 +1,10 @@
 ---
-stepsCompleted: [1, 2, 3, 4, 5, 6]
+stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8]
 inputDocuments: ['prd.md', 'ux-design-specification.md', 'product-brief-bmad-demo-2026-03-22.md', 'prd-validation-report.md', 'brainstorming-session-2026-03-22-01.md']
 workflowType: 'architecture'
+lastStep: 8
+status: 'complete'
+completedAt: '2026-03-22'
 project_name: 'FoodTech'
 user_name: 'TT'
 date: '2026-03-22'
@@ -717,3 +720,560 @@ Never log: passwords, tokens, full request bodies with sensitive data, PII beyon
 | `if (user.role === 'cook') { ... }` in component | Role logic in UI code | `@Roles('cook')` guard on API + role-based routing |
 | `fetch('/api/orders')` | Direct fetch bypasses cache and auth | `useQuery({ queryKey: ['orders'], queryFn: ... })` |
 | `orders.module.spec.ts` in `__tests__/` dir | Tests separated from source | `orders.service.test.ts` next to `orders.service.ts` |
+
+## Project Structure & Boundaries
+
+### Complete Project Directory Structure
+
+```
+foodtech/
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                      # Lint + test + build (all packages)
+│       ├── deploy-staging.yml          # Deploy to staging on merge to main
+│       └── deploy-prod.yml            # Deploy to prod on release tag
+├── .env.example                        # Template for local dev environment
+├── .gitignore
+├── docker-compose.yml                  # PostgreSQL + Redis + backend + frontends
+├── docker-compose.prod.yml             # Production-like local setup
+├── package.json                        # Workspace root (npm workspaces)
+├── turbo.json                          # Turborepo build orchestration
+├── tsconfig.base.json                  # Shared TypeScript config
+│
+├── backend/                            # NestJS API + WebSocket server
+│   ├── Dockerfile
+│   ├── nest-cli.json
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── .env.example
+│   ├── src/
+│   │   ├── main.ts                     # App bootstrap, Swagger setup
+│   │   ├── app.module.ts               # Root module
+│   │   ├── config/
+│   │   │   ├── app.config.ts
+│   │   │   ├── database.config.ts
+│   │   │   ├── redis.config.ts
+│   │   │   ├── jwt.config.ts
+│   │   │   └── throttle.config.ts
+│   │   ├── database/
+│   │   │   ├── drizzle.ts
+│   │   │   ├── schema/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── tenants.ts
+│   │   │   │   ├── users.ts
+│   │   │   │   ├── orders.ts
+│   │   │   │   ├── stations.ts
+│   │   │   │   ├── inventory.ts
+│   │   │   │   └── suppliers.ts
+│   │   │   ├── migrations/
+│   │   │   └── seed.ts
+│   │   ├── common/
+│   │   │   ├── decorators/
+│   │   │   │   ├── roles.decorator.ts
+│   │   │   │   ├── tenant.decorator.ts
+│   │   │   │   └── current-user.decorator.ts
+│   │   │   ├── guards/
+│   │   │   │   ├── jwt-auth.guard.ts
+│   │   │   │   ├── roles.guard.ts
+│   │   │   │   ├── tenant.guard.ts
+│   │   │   │   └── api-key.guard.ts
+│   │   │   ├── interceptors/
+│   │   │   │   ├── tenant-scope.interceptor.ts
+│   │   │   │   ├── logging.interceptor.ts
+│   │   │   │   └── transform.interceptor.ts
+│   │   │   ├── filters/
+│   │   │   │   └── http-exception.filter.ts
+│   │   │   ├── pipes/
+│   │   │   │   └── zod-validation.pipe.ts
+│   │   │   └── types/
+│   │   │       └── request.ts
+│   │   ├── modules/
+│   │   │   ├── auth/                           # Authentication
+│   │   │   │   ├── auth.module.ts
+│   │   │   │   ├── auth.controller.ts
+│   │   │   │   ├── auth.service.ts
+│   │   │   │   ├── strategies/
+│   │   │   │   │   ├── jwt.strategy.ts
+│   │   │   │   │   └── api-key.strategy.ts
+│   │   │   │   ├── dto/
+│   │   │   │   │   ├── login.dto.ts
+│   │   │   │   │   └── refresh-token.dto.ts
+│   │   │   │   └── auth.service.test.ts
+│   │   │   ├── orders/                         # FR1-FR10: The Rail
+│   │   │   │   ├── orders.module.ts
+│   │   │   │   ├── orders.controller.ts
+│   │   │   │   ├── orders.service.ts
+│   │   │   │   ├── orders.gateway.ts
+│   │   │   │   ├── orders.repository.ts
+│   │   │   │   ├── dto/
+│   │   │   │   │   ├── create-order.dto.ts
+│   │   │   │   │   ├── bump-order.dto.ts
+│   │   │   │   │   └── reassign-order.dto.ts
+│   │   │   │   ├── entities/
+│   │   │   │   │   └── order.schema.ts
+│   │   │   │   ├── events/
+│   │   │   │   │   └── order.events.ts
+│   │   │   │   └── orders.service.test.ts
+│   │   │   ├── kitchen-status/                 # FR11-FR18
+│   │   │   │   ├── kitchen-status.module.ts
+│   │   │   │   ├── kitchen-status.controller.ts
+│   │   │   │   ├── kitchen-status.service.ts
+│   │   │   │   ├── kitchen-status.gateway.ts
+│   │   │   │   ├── kitchen-status.repository.ts
+│   │   │   │   ├── dto/
+│   │   │   │   │   ├── update-station-status.dto.ts
+│   │   │   │   │   ├── update-inventory.dto.ts
+│   │   │   │   │   └── complete-checklist.dto.ts
+│   │   │   │   ├── events/
+│   │   │   │   │   └── kitchen-status.events.ts
+│   │   │   │   └── kitchen-status.service.test.ts
+│   │   │   ├── tempo/                          # FR19-FR23
+│   │   │   │   ├── tempo.module.ts
+│   │   │   │   ├── tempo.service.ts
+│   │   │   │   ├── tempo.gateway.ts
+│   │   │   │   ├── events/
+│   │   │   │   │   └── tempo.events.ts
+│   │   │   │   └── tempo.service.test.ts
+│   │   │   ├── customer-tracker/               # FR24-FR27
+│   │   │   │   ├── customer-tracker.module.ts
+│   │   │   │   ├── customer-tracker.controller.ts
+│   │   │   │   ├── customer-tracker.service.ts
+│   │   │   │   ├── customer-tracker.gateway.ts
+│   │   │   │   └── customer-tracker.service.test.ts
+│   │   │   ├── delivery/                       # FR28-FR31
+│   │   │   │   ├── delivery.module.ts
+│   │   │   │   ├── delivery.controller.ts
+│   │   │   │   ├── delivery.service.ts
+│   │   │   │   ├── delivery.gateway.ts
+│   │   │   │   └── delivery.service.test.ts
+│   │   │   ├── suppliers/                      # FR32-FR37
+│   │   │   │   ├── suppliers.module.ts
+│   │   │   │   ├── suppliers.controller.ts
+│   │   │   │   ├── suppliers.service.ts
+│   │   │   │   ├── suppliers.repository.ts
+│   │   │   │   ├── dto/
+│   │   │   │   │   ├── confirm-reorder.dto.ts
+│   │   │   │   │   └── batch-orders.dto.ts
+│   │   │   │   └── suppliers.service.test.ts
+│   │   │   ├── tenants/                        # FR38-FR43
+│   │   │   │   ├── tenants.module.ts
+│   │   │   │   ├── tenants.controller.ts
+│   │   │   │   ├── tenants.service.ts
+│   │   │   │   ├── tenants.repository.ts
+│   │   │   │   ├── dto/
+│   │   │   │   │   ├── create-location.dto.ts
+│   │   │   │   │   └── create-organization.dto.ts
+│   │   │   │   └── tenants.service.test.ts
+│   │   │   ├── admin/                          # FR44-FR48
+│   │   │   │   ├── admin.module.ts
+│   │   │   │   ├── admin.controller.ts
+│   │   │   │   ├── admin.service.ts
+│   │   │   │   └── admin.service.test.ts
+│   │   │   ├── integrations/                   # FR49-FR53
+│   │   │   │   ├── integrations.module.ts
+│   │   │   │   ├── webhooks.controller.ts
+│   │   │   │   ├── webhooks.service.ts
+│   │   │   │   ├── api-keys.service.ts
+│   │   │   │   └── integrations.service.test.ts
+│   │   │   └── simulator/                      # FR48: Demo Simulator
+│   │   │       ├── simulator.module.ts
+│   │   │       ├── simulator.controller.ts
+│   │   │       ├── simulator.service.ts
+│   │   │       ├── patterns/
+│   │   │       │   ├── rush.pattern.ts
+│   │   │       │   ├── steady.pattern.ts
+│   │   │       │   └── slow.pattern.ts
+│   │   │       └── simulator.service.test.ts
+│   │   └── gateways/
+│   │       └── events.gateway.ts
+│   └── test/
+│       ├── e2e/
+│       │   ├── orders.e2e.test.ts
+│       │   ├── auth.e2e.test.ts
+│       │   └── setup.ts
+│       └── fixtures/
+│           ├── tenant.fixture.ts
+│           ├── user.fixture.ts
+│           └── order.fixture.ts
+│
+├── frontend/                           # Restaurant SPA
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   ├── index.html
+│   ├── public/
+│   │   └── favicon.svg
+│   ├── src/
+│   │   ├── main.tsx
+│   │   ├── App.tsx
+│   │   ├── router.tsx
+│   │   ├── api/
+│   │   │   ├── client.ts
+│   │   │   ├── orders.api.ts
+│   │   │   ├── kitchen.api.ts
+│   │   │   └── auth.api.ts
+│   │   ├── components/
+│   │   │   ├── TicketCard/
+│   │   │   │   ├── TicketCard.tsx
+│   │   │   │   ├── TicketCard.test.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── BumpButton/
+│   │   │   │   ├── BumpButton.tsx
+│   │   │   │   ├── BumpButton.test.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── ServiceTempoGauge/
+│   │   │   │   ├── ServiceTempoGauge.tsx
+│   │   │   │   ├── ServiceTempoGauge.test.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── StationStatusIndicator/
+│   │   │   │   ├── StationStatusIndicator.tsx
+│   │   │   │   ├── StationStatusIndicator.test.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── Badge86/
+│   │   │   │   ├── Badge86.tsx
+│   │   │   │   ├── Badge86.test.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── CustomerProgressSteps/
+│   │   │   │   ├── CustomerProgressSteps.tsx
+│   │   │   │   ├── CustomerProgressSteps.test.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── CountdownETA/
+│   │   │   │   ├── CountdownETA.tsx
+│   │   │   │   ├── CountdownETA.test.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── ConnectionIndicator/
+│   │   │   │   ├── ConnectionIndicator.tsx
+│   │   │   │   ├── ConnectionIndicator.test.tsx
+│   │   │   │   └── index.ts
+│   │   │   └── AttentionWrapper/
+│   │   │       ├── AttentionWrapper.tsx
+│   │   │       ├── AttentionWrapper.test.tsx
+│   │   │       └── index.ts
+│   │   ├── views/
+│   │   │   ├── station/
+│   │   │   │   ├── StationView.tsx
+│   │   │   │   ├── StationView.test.tsx
+│   │   │   │   ├── hooks/
+│   │   │   │   │   └── useStationOrders.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── expeditor/
+│   │   │   │   ├── ExpeditorDashboard.tsx
+│   │   │   │   ├── ExpeditorDashboard.test.tsx
+│   │   │   │   ├── hooks/
+│   │   │   │   │   └── useExpeditorState.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── customer/
+│   │   │   │   ├── CustomerTracker.tsx
+│   │   │   │   ├── CustomerTracker.test.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── delivery/
+│   │   │   │   ├── DeliveryBoard.tsx
+│   │   │   │   ├── DeliveryBoard.test.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── management/
+│   │   │   │   ├── ManagementConsole.tsx
+│   │   │   │   ├── ManagementConsole.test.tsx
+│   │   │   │   └── index.ts
+│   │   │   └── admin/
+│   │   │       ├── AdminConsole.tsx
+│   │   │       ├── AdminConsole.test.tsx
+│   │   │       └── index.ts
+│   │   ├── hooks/
+│   │   │   ├── useSocket.ts
+│   │   │   ├── useAuth.ts
+│   │   │   ├── useTenant.ts
+│   │   │   └── useAttention.ts
+│   │   ├── stores/
+│   │   │   ├── authStore.ts
+│   │   │   ├── uiStore.ts
+│   │   │   └── offlineStore.ts
+│   │   ├── tokens/
+│   │   │   ├── kitchen-tokens.css
+│   │   │   ├── office-tokens.css
+│   │   │   ├── mobile-tokens.css
+│   │   │   └── TokenProvider.tsx
+│   │   ├── styles/
+│   │   │   └── globals.css
+│   │   └── utils/
+│   │       ├── formatTime.ts
+│   │       ├── calculateTempo.ts
+│   │       └── attention.ts
+│   └── e2e/
+│       ├── playwright.config.ts
+│       ├── station-view.e2e.ts
+│       └── customer-tracker.e2e.ts
+│
+├── supplier-portal/                    # Supplier SPA (separate auth domain)
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   ├── index.html
+│   ├── src/
+│   │   ├── main.tsx
+│   │   ├── App.tsx
+│   │   ├── router.tsx
+│   │   ├── api/
+│   │   │   ├── client.ts
+│   │   │   └── supplier.api.ts
+│   │   ├── components/
+│   │   │   ├── DemandDashboard/
+│   │   │   ├── OrderTable/
+│   │   │   ├── BatchActionBar/
+│   │   │   └── RestaurantFilter/
+│   │   ├── views/
+│   │   │   ├── dashboard/
+│   │   │   ├── orders/
+│   │   │   └── settings/
+│   │   ├── hooks/
+│   │   ├── stores/
+│   │   └── styles/
+│   └── e2e/
+│
+└── packages/
+    └── shared-types/
+        ├── package.json
+        ├── tsconfig.json
+        └── src/
+            ├── index.ts
+            ├── events.ts
+            ├── models.ts
+            ├── api.ts
+            ├── enums.ts
+            └── validators.ts
+```
+
+### Architectural Boundaries
+
+**API Boundaries:**
+
+| Boundary | Endpoint Pattern | Auth Method | Data Access |
+|----------|-----------------|-------------|-------------|
+| Restaurant API | `/api/v1/*` | JWT (staff roles) | Tenant-scoped |
+| Customer Tracker | `/api/v1/track/:token` | Order token (no login) | Single order only |
+| Delivery Board | `/api/v1/delivery/*` | Location API key | Tenant-scoped, read-only |
+| Supplier API | `/api/v1/supplier/*` | JWT (supplier role) | Cross-tenant (linked restaurants) |
+| POS Integration | `/api/v1/ingest/*` | API key + HMAC | Tenant-scoped, write |
+| Admin | `/api/v1/admin/*` | JWT (admin role) | Platform-wide |
+| WebSocket | `/tenant-{id}` namespace | JWT on connection | Tenant-scoped rooms |
+
+**Data Boundaries:**
+
+| Entity | Owner Module | Read Access | Write Access |
+|--------|-------------|-------------|--------------|
+| Orders | `orders` | All modules (tenant-scoped) | `orders`, `integrations` (POS ingest) |
+| Inventory | `kitchen-status` | `orders` (86 check), `suppliers`, `tempo` | `kitchen-status`, `orders` (auto-decrement) |
+| Stations | `kitchen-status` | `orders` (routing), `tempo` | `admin` (config), `kitchen-status` |
+| Users/Staff | `auth` + `tenants` | All modules (role checks) | `auth`, `admin` |
+| Supplier Orders | `suppliers` | `kitchen-status` (confirmation status) | `suppliers`, `kitchen-status` (auto-trigger) |
+| Tempo | `tempo` | `orders` (for dashboard) | `tempo` (calculated, not directly written) |
+
+### Requirements to Structure Mapping
+
+| FR Group | Backend Module | Frontend View | Phase |
+|----------|---------------|--------------|-------|
+| FR1-FR10 (The Rail) | `modules/orders/` | `views/station/`, `views/expeditor/` | Phase 1 |
+| FR11-FR18 (Kitchen Status) | `modules/kitchen-status/` | `views/expeditor/` | Phase 2 |
+| FR19-FR23 (Service Tempo) | `modules/tempo/` | `views/expeditor/` | Phase 2 |
+| FR24-FR27 (Customer Tracker) | `modules/customer-tracker/` | `views/customer/` | Phase 3 |
+| FR28-FR31 (Delivery Board) | `modules/delivery/` | `views/delivery/` | Phase 3 |
+| FR32-FR37 (Supplier) | `modules/suppliers/` | `supplier-portal/` | Phase 4 |
+| FR38-FR43 (Multi-Tenancy) | `modules/tenants/` | `views/management/` | Phase 0 |
+| FR44-FR48 (Admin) | `modules/admin/`, `modules/simulator/` | `views/admin/` | Phase 4 |
+| FR49-FR53 (API Platform) | `modules/integrations/` | N/A (external consumers) | Phase 0-1 |
+| FR54-FR57 (Real-Time) | `gateways/`, `common/` | `hooks/useSocket.ts` | Phase 0 |
+| FR58-FR63 (Display/A11y) | N/A (frontend concern) | All views + `tokens/` | All phases |
+
+### Integration Points
+
+**Internal Communication:**
+
+```
+Frontend ←→ Backend:
+  REST API (TanStack Query) ←→ NestJS Controllers
+  Socket.io Client ←→ NestJS Gateways
+
+Backend Internal:
+  Controllers → Services → Repositories → Drizzle → PostgreSQL
+  Services → EventBus → Gateways → Socket.io → Clients
+  Services → Redis (cache, pub/sub)
+
+Cross-Package:
+  shared-types → imported by backend + frontend + supplier-portal
+```
+
+**External Integrations:**
+
+| Integration | Direction | Module | Protocol |
+|-------------|-----------|--------|----------|
+| POS Systems | Inbound | `integrations` | REST webhook |
+| Supplier Systems | Outbound | `suppliers` | REST API push |
+| Sentry | Outbound | All | SDK |
+| AWS Services | Outbound | Infrastructure | SDK/native |
+
+### Development Workflow
+
+**Local development:** `docker compose up` starts everything. Backend on `:3000`, frontend on `:5173`, supplier-portal on `:5174`, PostgreSQL on `:5432`, Redis on `:6379`.
+
+**Build pipeline:** `turbo run build` builds all packages in dependency order (shared-types → backend → frontend → supplier-portal).
+
+**Test pipeline:** `turbo run test` runs all tests in parallel. `turbo run test:e2e` runs Playwright E2E tests sequentially.
+
+## Architecture Validation Results
+
+### Coherence Validation ✅
+
+**Decision Compatibility:**
+All technology choices work together without conflicts:
+- NestJS 11.x + Socket.io → first-class `@nestjs/platform-socket.io` integration; no friction
+- Drizzle ORM + PostgreSQL 16 → native support, TypeScript-native schema, no generate step
+- Vite 6.x + React 19 + Tailwind CSS 4.2 → `@tailwindcss/vite` plugin, clean integration
+- Zustand 5.x + TanStack Query 5.x → complementary (client state vs server state), no overlap confusion
+- Redis 7.x serves triple duty (Socket.io adapter, cache, pub/sub) — all well-documented patterns
+- Zod validates at API boundaries AND integrates with Drizzle schema + React Hook Form → single validation source
+- No version conflicts detected across the stack
+
+**Pattern Consistency:**
+- Naming conventions are internally consistent: snake_case DB → camelCase API/JSON → PascalCase classes/components
+- Event naming (`domain.entity.action`) aligns with the modular structure (one module per domain)
+- `FoodTechEvent<T>` typed wrapper + shared-types package ensures type safety across the WebSocket boundary
+- RFC 7807 error format is used universally — no competing error shapes
+- Co-located test pattern is consistent across backend (`.test.ts`) and frontend (`.test.tsx`)
+
+**Structure Alignment:**
+- Project directory mirrors the 4 system boundaries (Kitchen Ops Core → orders/kitchen-status/tempo modules; Ecosystem Views → customer-tracker/delivery; Supplier Platform → suppliers module + supplier-portal SPA; Platform Infrastructure → tenants/admin/integrations/common)
+- Guard chain (AuthGuard → TenantGuard → RolesGuard) maps cleanly to the common/guards/ directory
+- Shared-types as a separate package enables the documented cross-package type sharing pattern
+
+**Minor Observation:** The `gateways/events.gateway.ts` at the backend root level appears alongside per-module gateways (e.g., `orders.gateway.ts`). The role distinction (central event orchestrator vs module-specific gateways) is implied but could benefit from a one-line comment in the structure. Not blocking.
+
+### Requirements Coverage Validation ✅
+
+**Functional Requirements Coverage:**
+
+| FR Group | Architectural Support | Status |
+|----------|----------------------|--------|
+| FR1-10 (Order Lifecycle) | `orders` module + orders.gateway + Station/Expeditor views | ✅ Fully covered |
+| FR11-18 (Kitchen Status & Inventory) | `kitchen-status` module with inventory schema, 86 events | ✅ Fully covered |
+| FR19-23 (Service Tempo) | `tempo` module with calculated metrics + tempo.gateway | ✅ Fully covered |
+| FR24-27 (Customer Tracker) | `customer-tracker` module + token-based auth (no login) | ✅ Fully covered |
+| FR28-31 (Delivery) | `delivery` module + location API key auth | ✅ Fully covered |
+| FR32-37 (Supplier) | `suppliers` module + supplier-portal SPA (separate auth domain) | ✅ Fully covered |
+| FR38-43 (Multi-Tenancy) | `tenants` module + TenantScope interceptor + row-level scoping | ✅ Fully covered |
+| FR44-48 (Admin & Simulator) | `admin` module + `simulator` module with pace patterns | ✅ Fully covered |
+| FR49-53 (API Platform) | `integrations` module with webhooks, API keys, HMAC | ✅ Fully covered |
+| FR54-57 (Real-Time) | Socket.io gateways + Redis adapter + namespace-per-tenant | ✅ Fully covered |
+| FR58-63 (Display & Accessibility) | Design token system + Radix UI + axe-core CI | ✅ Fully covered |
+
+**Non-Functional Requirements Coverage:**
+
+| NFR Category | Architectural Decision | Status |
+|-------------|----------------------|--------|
+| Performance (< 500ms events, < 2s FMP) | Socket.io direct emit, Vite code splitting, < 500KB Station bundle | ✅ |
+| Security (tenant isolation, OWASP) | 3-guard chain, row-level tenant scoping, Zod validation, HMAC | ✅ |
+| Scalability (1000+ events/sec) | Redis adapter multi-node, stateless backend, PostgreSQL indexing | ✅ |
+| Reliability (99.9%, offline) | Blue-green deploys, Zustand persist + service worker, auto-reconnect | ✅ |
+| Accessibility (WCAG 2.1 AA) | Radix UI primitives, axe-core CI gate, design token contexts | ✅ |
+| Integration (REST, WebSocket, POS) | OpenAPI 3.0, Socket.io, webhook with retry, API key + HMAC | ✅ |
+
+### Implementation Readiness Validation ✅
+
+**Decision Completeness:**
+- All 18 core decisions include specific versions (PostgreSQL 16, NestJS 11.x, Vite 6.x, React 19, etc.)
+- Implementation patterns cover 28 identified conflict points across 5 categories
+- 8 mandatory enforcement rules are clear and actionable
+- 7 anti-patterns with corrections provide negative examples — excellent for AI agent guidance
+- Code examples provided for event payloads, Zustand stores, logging patterns, error responses
+
+**Structure Completeness:**
+- ~200 files explicitly defined in the directory tree
+- Every backend module follows the documented template (module, controller, service, repository, gateway, dto/, entities/, events/, tests)
+- Frontend components follow folder pattern (Component.tsx, test, index.ts)
+- Integration points mapped (internal REST/WebSocket, external POS/Supplier/Sentry/AWS)
+
+**Pattern Completeness:**
+- Naming conventions comprehensive across all 4 layers (DB, API, backend code, frontend code)
+- WebSocket event naming + `FoodTechEvent<T>` wrapper fully specified
+- Error handling patterns defined for both backend (NestJS exception classes) and frontend (TanStack Query + error boundaries)
+- Logging pattern with structured JSON and level guidance documented
+
+### Gap Analysis Results
+
+**Critical Gaps:** None identified. All implementation-blocking decisions are documented.
+
+**Important Gaps (2):**
+
+1. **Database migration strategy for multi-tenant schema changes** — The architecture specifies Drizzle Kit for migrations but doesn't address how schema migrations are applied across tenants when using shared-database row-level isolation. Since it's a shared database (not schema-per-tenant), standard Drizzle Kit migrations apply to all tenants simultaneously. Confirmed: shared-DB migrations affect all tenants atomically — no per-tenant migration logic needed.
+
+2. **WebSocket reconnection state sync protocol** — The architecture calls for "full state sync on reconnect" for Station View but doesn't specify the mechanism (full REST re-fetch, snapshot event, or diff from last eventId). Deferred to Station View story development — implementation detail that doesn't affect architectural decisions.
+
+**Nice-to-Have Gaps (3):**
+
+1. **Database indexing strategy** — Naming convention (`idx_{table}_{columns}`) is defined, but specific indexes beyond tenant_id aren't listed. Acceptable — these emerge during development.
+
+2. **Rate limiting specific thresholds** — `@nestjs/throttler` is chosen but specific per-endpoint limits aren't specified. Acceptable — configurable at implementation time.
+
+3. **Monitoring dashboard specifics** — CloudWatch + Sentry chosen, but specific dashboards/alerts aren't detailed. Acceptable — operational concern for post-MVP.
+
+### Validation Issues Addressed
+
+No critical or blocking issues found. The two "Important" gaps noted above are implementation details that can be resolved during story development without requiring architectural changes. The architecture is internally coherent and complete for guiding AI agent implementation.
+
+### Architecture Completeness Checklist
+
+**✅ Requirements Analysis**
+- [x] Project context thoroughly analyzed (63 FRs, 60+ NFRs, 7 views, 4 system boundaries)
+- [x] Scale and complexity assessed (High complexity)
+- [x] Technical constraints identified (7 constraints)
+- [x] Cross-cutting concerns mapped (7 concerns)
+
+**✅ Architectural Decisions**
+- [x] Critical decisions documented with versions (18 technology decisions)
+- [x] Technology stack fully specified (all versions pinned)
+- [x] Integration patterns defined (REST, WebSocket, webhook, API key + HMAC)
+- [x] Performance considerations addressed (bundle size, code splitting, Redis caching)
+
+**✅ Implementation Patterns**
+- [x] Naming conventions established (DB, API, backend code, frontend code)
+- [x] Structure patterns defined (NestJS module template, React component folder)
+- [x] Communication patterns specified (event naming, FoodTechEvent<T>, Zustand store pattern)
+- [x] Process patterns documented (error handling, logging, enforcement rules, anti-patterns)
+
+**✅ Project Structure**
+- [x] Complete directory structure defined (~200 files)
+- [x] Component boundaries established (4 system boundaries, 6 data ownership rules)
+- [x] Integration points mapped (internal + 4 external)
+- [x] Requirements to structure mapping complete (11 FR groups → modules + views + phases)
+
+### Architecture Readiness Assessment
+
+**Overall Status:** READY FOR IMPLEMENTATION
+
+**Confidence Level:** High — all 63 FRs are architecturally supported, all critical decisions are coherent, and the level of pattern specificity is sufficient to guide AI agents through consistent implementation.
+
+**Key Strengths:**
+- Exceptional traceability from FRs to backend modules to frontend views to implementation phases
+- Comprehensive naming and pattern conventions eliminate most AI agent ambiguity
+- Guard chain (Auth → Tenant → Roles) provides defense-in-depth security architecture
+- Event-driven design with typed events enables loose coupling between modules
+- Phased implementation sequence respects dependency ordering
+
+**Areas for Future Enhancement:**
+- Database indexing details (beyond naming convention) — emerge during development
+- WebSocket reconnection sync protocol — implementation detail for Station View story
+- Rate limiting thresholds — configurable post-deployment based on traffic patterns
+- Monitoring dashboards — operational concern for post-launch
+
+### Implementation Handoff
+
+**AI Agent Guidelines:**
+- Follow all architectural decisions exactly as documented
+- Use implementation patterns consistently across all components
+- Respect project structure and boundaries
+- Refer to this document for all architectural questions
+
+**First Implementation Priority:**
+Phase 0 infrastructure setup: monorepo scaffold (`npm init`, NestJS CLI, Vite create), PostgreSQL + Drizzle schema with tenant isolation, NestJS auth module (JWT + guards), Socket.io gateway + Redis adapter, shared-types package.
