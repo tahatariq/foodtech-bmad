@@ -6,7 +6,7 @@ Status: ready-for-dev
 
 As a **line cook (Marco)**,
 I want to tap a single bump button to advance my ticket to the next stage,
-so that I can move through orders quickly without any friction.
+So that I can move through orders quickly without any friction.
 
 ## Acceptance Criteria (BDD)
 
@@ -14,10 +14,10 @@ so that I can move through orders quickly without any friction.
 **When** Marco taps the bump button
 **Then** the ticket visually slides to the next stage (200ms ease-out animation) immediately via optimistic UI — before server confirmation
 **And** the next ticket in the queue rises to fill the gap
-**And** the stage counter updates (e.g., "Preparing: 4 → 3")
+**And** the stage counter updates (e.g., "Preparing: 4 -> 3")
 
 **Given** the bump button component
-**Then** it renders as a full-width button at the bottom of the ticket card, 56dp height, "BUMP →" label, brand blue (#3B82F6), with no confirmation dialog
+**Then** it renders as a full-width button at the bottom of the ticket card, 56dp height, "BUMP ->" label, brand blue (#3B82F6), with no confirmation dialog
 **And** touch feedback is immediate: press state darkens (50ms), brief scale-down (0.98)
 **And** keyboard activation via Enter/Space is supported
 **And** `aria-label="Advance order [number] to [next stage]"`
@@ -35,144 +35,148 @@ so that I can move through orders quickly without any friction.
 ## Tasks / Subtasks
 
 ### Task 1: Create BumpButton component (AC 2)
-- [ ] Create `frontend/src/components/BumpButton/BumpButton.tsx`
-- [ ] Render full-width button at bottom of ticket card
-- [ ] 56dp height, "BUMP →" label, brand blue background (#3B82F6)
-- [ ] No confirmation dialog on tap
-- [ ] Touch feedback: press state darkens (50ms transition), brief scale-down (0.98) on tap
-- [ ] Keyboard activation: Enter and Space keys trigger bump
-- [ ] Dynamic `aria-label="Advance order [number] to [next stage]"` with order number and next stage name
-- [ ] `role="button"` (native button element)
-- [ ] 24px padding
-- [ ] `disabled` state: grayed out during sync conflict
-- [ ] Create `frontend/src/components/BumpButton/index.ts` re-export
-- [ ] Create `frontend/src/components/BumpButton/BumpButton.test.tsx`
+- [ ] Create `frontend/src/components/kitchen/BumpButton/BumpButton.tsx`
+- [ ] Render as native `<button>` element — full-width at bottom of ticket card
+- [ ] 56dp minimum height, "BUMP ->" label text (bold, uppercase)
+- [ ] Background: brand blue `#3B82F6`, text white, rounded-lg
+- [ ] No confirmation dialog on tap — immediate action
+- [ ] Touch feedback CSS: `:active` state darkens background to `#2563EB` (50ms transition), `transform: scale(0.98)` on press
+- [ ] Keyboard activation: native button handles Enter/Space automatically
+- [ ] Dynamic `aria-label="Advance order {orderNumber} to {nextStageName}"`
+- [ ] `disabled` state: `opacity-50`, `cursor-not-allowed`, grayed out during in-flight mutation
+- [ ] 24px horizontal padding
+- [ ] Create `frontend/src/components/kitchen/BumpButton/index.ts` barrel re-export
+- [ ] Create `frontend/src/components/kitchen/BumpButton/BumpButton.test.tsx`
 
-### Task 2: Implement optimistic bump in frontend (AC 1)
-- [ ] Create `useBump` hook or extend `useStationOrders` to handle bump action
-- [ ] On bump tap: immediately update TanStack Query cache via `queryClient.setQueryData()` — move ticket to next stage
-- [ ] Animate ticket slide-out (200ms ease-out CSS transition)
-- [ ] Animate next ticket rising to fill gap (200ms ease-out)
-- [ ] Update stage counter display (e.g., "Preparing: 4 → 3")
-- [ ] Use TanStack Query's `useMutation` with `onMutate` for optimistic update
+### Task 2: Implement `useBump` mutation hook with optimistic update (AC 1)
+- [ ] Create `frontend/src/views/StationView/hooks/useBump.ts`
+- [ ] Use TanStack Query `useMutation` calling `POST /api/v1/orders/:orderId/bump`
+- [ ] `onMutate`: snapshot current cache, optimistically update ticket stage in TanStack Query cache via `queryClient.setQueryData(['orders', stationId], updater)`
+- [ ] Optimistic updater: move the bumped order to next stage, decrement stage counter
+- [ ] Return `{ previousOrders }` context for rollback
+- [ ] `onError`: restore cache from snapshot (`queryClient.setQueryData` with previous data)
+- [ ] `onSettled`: optionally invalidate query to ensure server consistency
 
-### Task 3: Implement bump rollback on server rejection (AC 4)
-- [ ] In `useMutation.onError` callback: revert TanStack Query cache to previous state
-- [ ] Snap ticket back to its previous stage position (no animation — instant snap)
-- [ ] Apply amber flash animation (0.5s) to the reverted ticket
-- [ ] Display non-blocking toast notification with rejection reason (e.g., "Order was cancelled by another user")
-- [ ] Use a lightweight toast library or create simple toast component
+### Task 3: Implement bump animations (AC 1, AC 3)
+- [ ] Ticket slide-out animation: CSS transition `transform: translateX(100%)` over 200ms ease-out
+- [ ] Gap fill animation: remaining tickets shift up with 200ms ease-out transition (CSS `transition: transform 200ms ease-out`)
+- [ ] Stage counter update: animate number change (e.g., "Preparing: 4 -> 3")
+- [ ] Final stage fade-out: when ticket reaches "served", apply `opacity: 0` transition over 300ms, then remove from DOM
+- [ ] Respect `prefers-reduced-motion`: skip slide/fade, use instant transitions
 
-### Task 4: Create backend bump API endpoint (AC 5)
-- [ ] Add `POST /api/v1/orders/:orderId/bump` endpoint to `OrdersController`
-- [ ] Apply auth guard (JWT) and role guard (`line_cook`, `expeditor`)
-- [ ] Apply `TenantScope` interceptor
+### Task 4: Implement bump rollback on server rejection (AC 4)
+- [ ] In `useMutation.onError` callback: restore TanStack Query cache from `previousOrders` snapshot
+- [ ] Snap ticket back to previous position instantly (no animation)
+- [ ] Apply amber flash animation: `@keyframes amberFlash` — amber border/glow for 0.5s, then fade
+- [ ] Display non-blocking toast notification with rejection reason text
+- [ ] Toast: auto-dismiss after 4 seconds, positioned bottom-center, amber background
+- [ ] Create lightweight toast component or use existing toast system
 
-### Task 5: Implement OrdersService.bumpOrder() (AC 1, AC 3, AC 5)
-- [ ] Implement `bumpOrder(orderId, tenantId)` method in `OrdersService`
-- [ ] Look up current stage of order's items at the requesting station
-- [ ] Look up next stage from `order_stages` table (by sequence + 1)
-- [ ] If next stage exists: update `order_items.stage` to next stage
-- [ ] If current stage is the last stage: mark as "served", set `order.status = 'served'`
-- [ ] Check if ALL items across ALL stations have reached final stage — if so, set `order.status = 'completed'`
-- [ ] Return updated order state
-- [ ] Handle conflict: if order is already cancelled or completed, return 409
+### Task 5: Create backend bump API endpoint (AC 5)
+- [ ] Add `POST /api/v1/orders/:orderId/bump` to `backend/src/orders/orders.controller.ts`
+- [ ] Apply guard chain: `AuthGuard -> TenantGuard -> RolesGuard(['line_cook', 'expeditor'])`
+- [ ] Validate `orderId` is UUID format (Zod pipe validation)
+- [ ] Return 200 with updated order state on success
+- [ ] Return 404 if order not found in tenant
+- [ ] Return 409 if order is already cancelled or completed (conflict)
 
-### Task 6: Emit WebSocket events on bump (AC 3, AC 5)
-- [ ] After successful bump: emit `order.stage.changed` event via `OrdersGateway`
-- [ ] Payload: `FoodTechEvent<{ orderId, fromStage, toStage, stationId }>` with tenantId, timestamp, eventId
+### Task 6: Implement OrdersService.bumpOrder() business logic (AC 1, AC 3, AC 5)
+- [ ] Create `bumpOrder(orderId: string, tenantId: string, stationId: string)` method in `backend/src/orders/orders.service.ts`
+- [ ] Look up current stage of order items at the requesting station
+- [ ] Look up next stage from `order_stages` table (current sequence + 1)
+- [ ] If next stage exists: update `order_items.stage` to next stage name, update `order_items.updated_at`
+- [ ] If current stage is the last configured stage: set item stage to "served"
+- [ ] Check if ALL items across ALL stations have reached final stage — if so, set `order.status = 'completed'`, update `order.updated_at`
+- [ ] Wrap in database transaction for atomicity
+- [ ] Return updated order object with new stage info
+
+### Task 7: Emit WebSocket events on bump (AC 3, AC 5)
+- [ ] After successful bump in service: emit `order.stage.changed` event via Socket.io gateway
+- [ ] Event payload: `FoodTechEvent<{ orderId, orderNumber, fromStage, toStage, stationId, timestamp }>`
 - [ ] Fan out to rooms: `station:{stationId}`, `expeditor`, `customer:{orderId}`
-- [ ] If order completed: emit `order.completed` event with `{ orderId, completedAt, totalTime }`
-- [ ] Frontend: ticket fades out (300ms CSS transition) when final stage reached
+- [ ] If order completed: emit `order.completed` event with `{ orderId, orderNumber, completedAt, totalTimeMs }`
+- [ ] Calculate `totalTimeMs` from order `created_at` to completion time
 
-### Task 7: Integrate BumpButton into TicketCard (AC 1, AC 2)
-- [ ] Add `BumpButton` to bottom of `TicketCard` component (station variant)
-- [ ] Pass order number and next stage name to BumpButton for aria-label
-- [ ] Wire `onClick` to optimistic bump mutation
-- [ ] Disable button while mutation is in-flight to prevent double-bumps
+### Task 8: Integrate BumpButton into TicketCard (AC 1, AC 2)
+- [ ] Add `BumpButton` to bottom of `TicketCard` when `variant="station"`
+- [ ] Pass `orderNumber` and `nextStageName` to BumpButton for aria-label computation
+- [ ] Wire `onClick` to `useBump` mutation's `mutate()` function
+- [ ] Disable BumpButton while mutation is in-flight (`isPending`) to prevent double-bumps
+- [ ] Do not render BumpButton for `expeditor` or `rail` variants
 
-### Task 8: Write frontend tests (AC 1, AC 2, AC 4)
-- [ ] Test BumpButton renders with correct label, size, color
-- [ ] Test keyboard activation (Enter/Space)
-- [ ] Test aria-label contains order number and next stage
-- [ ] Test optimistic update: ticket moves immediately on bump
-- [ ] Test rollback: ticket snaps back on server rejection with amber flash
-- [ ] Test toast notification appears on rejection
-- [ ] Test button disabled state during mutation
+### Task 9: Create bump API client function (AC 5)
+- [ ] Add `bumpOrder(orderId: string): Promise<Order>` to `frontend/src/api/orders.api.ts`
+- [ ] POST to `/api/v1/orders/${orderId}/bump`
+- [ ] Include auth token via interceptor
+- [ ] Type response using shared-types `Order` interface
 
-### Task 9: Write backend tests (AC 3, AC 5)
-- [ ] Test `POST /api/v1/orders/:orderId/bump` advances to next stage
-- [ ] Test bump on final stage sets order to "served"
-- [ ] Test bump on already-completed order returns 409
-- [ ] Test `order.stage.changed` event emitted with correct payload
-- [ ] Test `order.completed` event emitted when all items reach final stage
-- [ ] Test tenant isolation — cannot bump order from another tenant
+### Task 10: Write frontend tests (AC 1, AC 2, AC 4)
+- [ ] Test BumpButton renders with correct label ("BUMP ->"), size (56dp+), color (#3B82F6)
+- [ ] Test BumpButton `aria-label` contains order number and next stage name
+- [ ] Test keyboard activation: simulate Enter and Space keypress events
+- [ ] Test optimistic update: after bump, ticket cache reflects next stage before API resolves
+- [ ] Test rollback: on API error, ticket returns to previous stage
+- [ ] Test amber flash animation class applied on rollback
+- [ ] Test toast notification appears with rejection reason on error
+- [ ] Test button shows disabled state during in-flight mutation
+- [ ] Test final-stage bump triggers fade-out animation
+
+### Task 11: Write backend tests (AC 3, AC 5)
+- [ ] Test `POST /api/v1/orders/:orderId/bump` returns 200 with updated order
+- [ ] Test bump advances item from "received" to "preparing"
+- [ ] Test bump on last stage sets item to "served"
+- [ ] Test bump when all items completed sets `order.status = 'completed'`
+- [ ] Test bump on cancelled order returns 409
+- [ ] Test bump on completed order returns 409
+- [ ] Test `order.stage.changed` event emitted with correct payload shape
+- [ ] Test `order.completed` event emitted when all items done
+- [ ] Test tenant isolation: cannot bump order belonging to another tenant (404)
+- [ ] Test unauthorized role returns 403
 
 ## Dev Notes
 
-### Architecture References
-- Optimistic UI pattern: TanStack Query `useMutation` with `onMutate` (optimistic update) and `onError` (rollback)
-- WebSocket event flow: Cook bumps → `OrderService.advanceStage()` → `EventBus.emit('order.stage.changed')` → Socket.io gateway fans out to rooms
-- Event format: `FoodTechEvent<T>` wrapper with typed payload
-- Guard chain for bump: `AuthGuard → TenantGuard → RolesGuard(['line_cook', 'expeditor']) → Controller`
-- Conflict handling: 409 response if order already bumped/cancelled by another user
+### Architecture Patterns
+- Optimistic UI pattern: TanStack Query `useMutation` with `onMutate` (cache snapshot + optimistic update) and `onError` (rollback from snapshot)
+- WebSocket event flow: Cook bumps -> `OrderService.bumpOrder()` -> DB transaction -> `EventBus.emit('order.stage.changed')` -> Socket.io gateway fans out to rooms
+- Event format: `FoodTechEvent<T>` wrapper with typed payload, `eventId` for deduplication
+- Guard chain: `AuthGuard -> TenantGuard -> RolesGuard(['line_cook', 'expeditor']) -> Controller`
+- Conflict handling: 409 Conflict response if order state has changed (cancelled/completed)
+- Animation: CSS transitions only (no JS animation libraries) — 200ms ease-out slide, 300ms fade-out, 50ms press feedback
 
-### Technical Stack
-- Frontend: React 19, TanStack Query 5.x (useMutation + optimistic updates), Tailwind CSS v4.2
-- Backend: NestJS 11.x, Socket.io, Drizzle ORM
-- Animation: CSS transitions (200ms ease-out slide, 300ms fade-out, 50ms press feedback)
+### Project Structure Notes
 
-### UX Component Specifications
-
-**BumpButton:**
-- Purpose: One-tap stage advancement — the atomic interaction
-- Content: "BUMP →" label
-- Actions: Single tap advances ticket. No confirmation. No long-press variant.
-- States: `default` (primary blue #3B82F6), `pressed` (darkened, 50ms), `bumping` (scale-down 0.98), `disabled` (grayed, during sync conflict)
-- Accessibility: `role="button"`, `aria-label="Advance order [number] to [next stage]"`, keyboard Enter/Space
-- Touch target: 56dp height, full card width, 24px padding
-
-### File Structure
 ```
-frontend/src/components/BumpButton/
-├── BumpButton.tsx             # NEW
-├── BumpButton.test.tsx        # NEW
-└── index.ts                   # NEW
+frontend/src/components/kitchen/BumpButton/
+├── BumpButton.tsx                    # NEW
+├── BumpButton.test.tsx               # NEW
+└── index.ts                          # NEW
 
-frontend/src/views/station/
-├── StationView.tsx            # MODIFY — integrate BumpButton
+frontend/src/views/StationView/
+├── StationView.tsx                   # MODIFY — integrate BumpButton into TicketCard
 └── hooks/
-    └── useStationOrders.ts    # MODIFY — add bump mutation
+    ├── useStationOrders.ts           # MODIFY — add stage counter state
+    └── useBump.ts                    # NEW — optimistic bump mutation
 
-frontend/src/components/TicketCard/
-└── TicketCard.tsx             # MODIFY — add BumpButton slot
+frontend/src/components/kitchen/TicketCard/
+└── TicketCard.tsx                    # MODIFY — add BumpButton slot at bottom
 
-backend/src/modules/orders/
-├── orders.controller.ts       # MODIFY — add POST /bump endpoint
-├── orders.service.ts          # MODIFY — add bumpOrder() method
-├── orders.gateway.ts          # MODIFY — emit stage.changed and completed events
-└── orders.service.test.ts     # MODIFY — add bump tests
+frontend/src/api/orders.api.ts        # MODIFY — add bumpOrder() function
 
-packages/shared-types/src/
-└── events.ts                  # MODIFY — add order.stage.changed, order.completed types
+backend/src/orders/
+├── orders.controller.ts              # MODIFY — add POST /bump endpoint
+├── orders.service.ts                 # MODIFY — add bumpOrder() method
+├── orders.service.test.ts            # MODIFY — add bump tests
+└── orders.gateway.ts                 # MODIFY — emit stage.changed and completed events
+
+packages/shared-types/src/events.ts   # MODIFY — add order.stage.changed, order.completed types
 ```
-
-### Testing Requirements
-- Frontend: Vitest + React Testing Library for component tests, test optimistic update and rollback
-- Backend: Jest for service/controller tests, test stage progression logic
-- Integration: test full bump flow from tap → API → WebSocket event → cache update
-- Accessibility: verify keyboard activation, ARIA labels, touch target size
-
-### Dependencies
-- Story 2.1 must be complete (order_stages table for stage sequence lookup)
-- Story 2.2 must be complete (orders exist, order.created event infrastructure)
-- Story 2.3 must be complete (TicketCard component, StationView, useStationOrders hook)
 
 ### References
 - [Source: epics.md#Epic 2, Story 2.4]
 - [Source: ux-design-specification.md#Journey 1: Marco — Bump-to-Advance]
 - [Source: ux-design-specification.md#Custom Components — BumpButton]
 - [Source: architecture.md#Frontend Architecture — State Management]
+- UX-DR3 (zero-friction bump interaction)
 
 ## Dev Agent Record
 
