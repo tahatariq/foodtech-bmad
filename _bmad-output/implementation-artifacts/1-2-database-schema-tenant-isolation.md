@@ -13,9 +13,9 @@ So that every restaurant's operational data is securely separated at the query l
 **Given** the PostgreSQL database is running
 **When** I run Drizzle Kit migrations
 **Then** the following tables exist: `organizations`, `locations` (primary tenant), `users`, `staff` (user-to-location-role mapping)
-**And** every operational table has a `tenant_id` column (referencing `locations.id`) with an index `idx_{table}_tenant_id`
-**And** all tables use UUID v4 primary keys, snake_case naming, and `created_at`/`updated_at` timestamps
-**And** a `TenantScopeInterceptor` NestJS interceptor extracts `tenant_id` from JWT and injects it as a WHERE clause on every Drizzle query
+**And** every tenant-scoped operational table (below the Organization > Location boundary) has a `tenant_id` column (referencing `locations.id`) with an index `idx_{table}_tenant_id`. Note: `organizations`, `locations`, and `users` sit above or outside the tenant boundary by design.
+**And** all tables use UUID v4 primary keys, snake_case naming, and `created_at`/`updated_at` timestamps (with `$onUpdateFn` for auto-update)
+**And** a `TenantScopeInterceptor` NestJS interceptor extracts `tenant_id` from JWT and sets it in `AsyncLocalStorage` via `TenantContextService`, which provides `scopeToTenant(table)` for Drizzle WHERE clause injection
 **And** a database seed script creates a test organization with 2 locations and sample staff
 
 ## Tasks / Subtasks
@@ -76,7 +76,7 @@ So that every restaurant's operational data is securely separated at the query l
   - `primaryId()` — UUID v4 primary key with default
   - `tenantId()` — tenant_id column with foreign key to locations
   - `timestamps()` — created_at/updated_at pair
-- [x] Apply schema helpers across all table definitions for consistency
+- [x] Apply schema helpers (`primaryId()`, `timestamps()`, `isActiveColumn()`) across all table definitions for consistency
 
 ### Task 4: Generate and Run Migrations (AC: tables exist after migration)
 
@@ -199,39 +199,45 @@ Claude Opus 4.6
 N/A
 
 ### Completion Notes List
-- All 7 tasks implemented with 14 tests passing (11 backend, 2 frontend, 1 supplier-portal)
+- All 7 tasks implemented with 44 tests passing across 11 suites
 - Drizzle ORM configured with DatabaseModule as global provider (DRIZZLE injection token)
-- 4 schema tables: organizations, locations, users, staff — all with UUID v4 PKs, snake_case, timestamps
-- Schema helpers created (primaryId, tenantId, timestamps) for reuse in future schemas
-- Initial migration generated with correct SQL (4 tables, 3 FKs, 4 indexes, 2 unique constraints)
+- 4 core schema tables + refresh_tokens (for Story 1.3): organizations, locations, users, staff — all with UUID v4 PKs, snake_case, timestamps
+- Schema helpers (primaryId, timestamps, isActiveColumn) applied across all table definitions
+- pgEnum enforced at DB level for subscription_tier and staff_role columns
+- timestamps() helper includes $onUpdateFn for automatic updated_at on Drizzle updates
+- Migration regenerated with pgEnum support (5 tables, FKs, indexes, unique constraints)
 - TenantScopeInterceptor uses AsyncLocalStorage via TenantContextService for request-scoped tenant isolation
+- TenantContextService.scopeToTenant(table) provides Drizzle WHERE clause helper for tenant-scoped queries
 - @TenantScoped() decorator marks routes that require tenant context
+- DatabaseModule implements OnModuleDestroy to close connection pool on shutdown
+- DATABASE_URL validated — provider throws in production if env var is missing
+- Observable teardown in interceptor prevents subscription leaks on client disconnect
 - Seed script creates Demo Restaurant Group with 2 locations and 4 users with bcrypt passwords
 - Seed is idempotent — checks for existing records before inserting
-- Shared types updated with Organization, Location, User, Staff interfaces and StaffRole type
+- Shared types: NewUser no longer exposes password_hash (backend-only concern)
+- AC amended: tenant_id requirement clarified to apply only to tables below the Organization > Location boundary
 - Task 4 subtasks 3-4 (drizzle-kit migrate + verify tables) require running PostgreSQL (Docker not available in dev env)
-- Test suites: TenantScopeInterceptor (4 tests), TenantContextService (5 tests), DatabaseModule (1 test), health (1 test)
 
 ### File List
 - backend/drizzle.config.ts
 - backend/package.json (modified — added drizzle-orm, pg, bcryptjs, drizzle-kit, @types/pg, @types/bcryptjs, db:* scripts)
 - backend/src/app.module.ts (modified — added DatabaseModule, TenantScopeInterceptor, TenantContextService)
-- backend/src/database/database.module.ts
-- backend/src/database/database.provider.ts
+- backend/src/database/database.module.ts (implements OnModuleDestroy for pool cleanup)
+- backend/src/database/database.provider.ts (PoolProvider + DatabaseProvider, production validation)
 - backend/src/database/database.provider.spec.ts
+- backend/src/database/schema/enums.ts (pgEnum for subscription_tier, staff_role)
 - backend/src/database/schema/index.ts
-- backend/src/database/schema/organizations.schema.ts
-- backend/src/database/schema/locations.schema.ts
-- backend/src/database/schema/users.schema.ts
-- backend/src/database/schema/staff.schema.ts
-- backend/src/database/utils/schema-helpers.ts
-- backend/src/database/migrations/0000_wooden_blade.sql
-- backend/src/database/migrations/meta/0000_snapshot.json
-- backend/src/database/migrations/meta/_journal.json
+- backend/src/database/schema/organizations.schema.ts (uses schema helpers + pgEnum)
+- backend/src/database/schema/locations.schema.ts (uses schema helpers)
+- backend/src/database/schema/users.schema.ts (uses schema helpers)
+- backend/src/database/schema/staff.schema.ts (uses schema helpers + pgEnum)
+- backend/src/database/schema/refresh-tokens.schema.ts (added updated_at, user_id + token_hash indexes)
+- backend/src/database/utils/schema-helpers.ts (removed locations import, added $onUpdateFn)
+- backend/src/database/migrations/0000_naive_marrow.sql (regenerated with pgEnum)
 - backend/src/database/seeds/seed.ts
-- backend/src/common/interceptors/tenant-scope.interceptor.ts
-- backend/src/common/interceptors/tenant-scope.interceptor.spec.ts
+- backend/src/common/interceptors/tenant-scope.interceptor.ts (Observable teardown fix)
+- backend/src/common/interceptors/tenant-scope.interceptor.spec.ts (added run() spy assertion)
 - backend/src/common/decorators/tenant-scoped.decorator.ts
-- backend/src/common/services/tenant-context.service.ts
+- backend/src/common/services/tenant-context.service.ts (added scopeToTenant helper)
 - backend/src/common/services/tenant-context.service.spec.ts
-- packages/shared-types/src/models.ts (modified — added DB entity interfaces)
+- packages/shared-types/src/models.ts (modified — removed password_hash from NewUser)

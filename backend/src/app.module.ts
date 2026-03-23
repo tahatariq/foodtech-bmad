@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { GatewaysModule } from './gateways/gateways.module';
+import { JwtAuthGuard } from './common/guards/auth.guard';
+import { TenantGuard } from './common/guards/tenant.guard';
+import { RolesGuard } from './common/guards/roles.guard';
 import { TenantScopeInterceptor } from './common/interceptors/tenant-scope.interceptor';
 import { TenantContextService } from './common/services/tenant-context.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -16,11 +20,24 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     }),
     DatabaseModule,
     AuthModule,
+    GatewaysModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     TenantContextService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: TenantGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: TenantScopeInterceptor,

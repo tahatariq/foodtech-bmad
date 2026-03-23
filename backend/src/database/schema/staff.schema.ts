@@ -1,35 +1,22 @@
-import {
-  pgTable,
-  text,
-  boolean,
-  timestamp,
-  index,
-  unique,
-} from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
+import { pgTable, text, index, unique } from 'drizzle-orm/pg-core';
+import { primaryId, timestamps, isActiveColumn } from '../utils/schema-helpers';
+import { staffRoleEnum } from './enums';
 import { users } from './users.schema';
 import { locations } from './locations.schema';
 
 export const staff = pgTable(
   'staff',
   {
-    id: text('id')
-      .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+    id: primaryId(),
     user_id: text('user_id')
       .notNull()
       .references(() => users.id),
     tenant_id: text('tenant_id')
       .notNull()
       .references(() => locations.id),
-    role: text('role').notNull(),
-    is_active: boolean('is_active').notNull().default(true),
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updated_at: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    role: staffRoleEnum('role').notNull(),
+    is_active: isActiveColumn(),
+    ...timestamps(),
   },
   (table) => [
     index('idx_staff_tenant_id').on(table.tenant_id),

@@ -11,7 +11,7 @@ describe('HttpExceptionFilter', () => {
   let mockStatus: jest.Mock;
   let mockGetResponse: jest.Mock;
   let mockGetRequest: jest.Mock;
-  let mockHost: any;
+  let mockHost: import('@nestjs/common').ArgumentsHost;
 
   beforeEach(() => {
     filter = new HttpExceptionFilter();
@@ -24,7 +24,12 @@ describe('HttpExceptionFilter', () => {
         getResponse: mockGetResponse,
         getRequest: mockGetRequest,
       }),
-    };
+      switchToRpc: jest.fn(),
+      switchToWs: jest.fn(),
+      getType: jest.fn().mockReturnValue('http'),
+      getArgs: jest.fn().mockReturnValue([]),
+      getArgByIndex: jest.fn(),
+    } as unknown as import('@nestjs/common').ArgumentsHost;
   });
 
   it('should format 401 as RFC 7807 Problem Detail', () => {
@@ -42,10 +47,15 @@ describe('HttpExceptionFilter', () => {
   });
 
   it('should not leak specific error details for 401', () => {
-    const exception = new UnauthorizedException('User admin@demo.com not found');
+    const exception = new UnauthorizedException(
+      'User admin@demo.com not found',
+    );
     filter.catch(exception, mockHost);
 
-    const response = mockJson.mock.calls[0][0];
+    const response = (mockJson.mock.calls[0] as unknown[])[0] as Record<
+      string,
+      unknown
+    >;
     expect(response.detail).toBe('Invalid email or password');
     expect(response.detail).not.toContain('admin@demo.com');
   });

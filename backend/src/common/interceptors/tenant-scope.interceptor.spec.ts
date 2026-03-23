@@ -59,13 +59,15 @@ describe('TenantScopeInterceptor', () => {
     );
   });
 
-  it('should set tenant context when tenant-scoped with valid JWT', (done) => {
+  it('should set tenant context with correct tenantId when tenant-scoped with valid JWT', (done) => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(true);
+    const runSpy = jest.spyOn(tenantContext, 'run');
 
     const context = createMockContext({ tenantId: 'tenant-abc' });
     interceptor.intercept(context, mockCallHandler).subscribe({
       next: (value) => {
         expect(value).toEqual({ data: 'test' });
+        expect(runSpy).toHaveBeenCalledWith('tenant-abc', expect.any(Function));
       },
       complete: done,
     });

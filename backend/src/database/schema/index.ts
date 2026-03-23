@@ -1,3 +1,4 @@
+export { subscriptionTierEnum, staffRoleEnum } from './enums';
 export { organizations } from './organizations.schema';
 export { locations } from './locations.schema';
 export { users } from './users.schema';

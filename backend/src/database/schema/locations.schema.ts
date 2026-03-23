@@ -1,26 +1,19 @@
-import { pgTable, text, boolean, timestamp, index } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
+import { pgTable, text, index } from 'drizzle-orm/pg-core';
+import { primaryId, timestamps, isActiveColumn } from '../utils/schema-helpers';
 import { organizations } from './organizations.schema';
 
 export const locations = pgTable(
   'locations',
   {
-    id: text('id')
-      .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+    id: primaryId(),
     organization_id: text('organization_id')
       .notNull()
       .references(() => organizations.id),
     name: text('name').notNull(),
     address: text('address'),
     timezone: text('timezone').notNull().default('UTC'),
-    is_active: boolean('is_active').notNull().default(true),
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updated_at: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    is_active: isActiveColumn(),
+    ...timestamps(),
   },
   (table) => [index('idx_locations_organization_id').on(table.organization_id)],
 );

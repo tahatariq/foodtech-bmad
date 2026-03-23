@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
+import { Request } from 'express';
 import { TENANT_SCOPED_KEY } from '../decorators/tenant-scoped.decorator';
 import { TenantContextService } from '../services/tenant-context.service';
 
@@ -27,8 +28,8 @@ export class TenantScopeInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    const request = context.switchToHttp().getRequest<Request>();
+    const user = request.user as Record<string, unknown> | undefined;
 
     if (!user?.tenantId) {
       throw new ForbiddenException(
@@ -37,12 +38,13 @@ export class TenantScopeInterceptor implements NestInterceptor {
     }
 
     return new Observable((subscriber) => {
-      this.tenantContext.run(user.tenantId, () => {
-        next.handle().subscribe({
+      this.tenantContext.run(user.tenantId as string, () => {
+        const inner = next.handle().subscribe({
           next: (value) => subscriber.next(value),
           error: (err) => subscriber.error(err),
           complete: () => subscriber.complete(),
         });
+        subscriber.add(inner);
       });
     });
   }

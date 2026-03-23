@@ -143,9 +143,7 @@ async function seed() {
       .select()
       .from(staff)
       .where(eq(staff.user_id, s.user_id));
-    const hasAssignment = existing.some(
-      (e) => e.tenant_id === s.tenant_id,
-    );
+    const hasAssignment = existing.some((e) => e.tenant_id === s.tenant_id);
     if (!hasAssignment) {
       await db.insert(staff).values(s);
       console.log(

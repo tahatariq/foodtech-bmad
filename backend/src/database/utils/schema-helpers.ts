@@ -1,17 +1,10 @@
-import { text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { text, boolean, timestamp } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import { locations } from '../schema/locations.schema';
 
 export function primaryId() {
   return text('id')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID());
-}
-
-export function tenantId() {
-  return text('tenant_id')
-    .notNull()
-    .references(() => locations.id);
 }
 
 export function timestamps() {
@@ -21,7 +14,8 @@ export function timestamps() {
       .default(sql`now()`),
     updated_at: timestamp('updated_at', { withTimezone: true })
       .notNull()
-      .default(sql`now()`),
+      .default(sql`now()`)
+      .$onUpdateFn(() => new Date()),
   };
 }
 

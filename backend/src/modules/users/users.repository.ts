@@ -29,9 +29,6 @@ export class UsersRepository {
   }
 
   async findStaffRoles(userId: string) {
-    return this.db
-      .select()
-      .from(staff)
-      .where(eq(staff.user_id, userId));
+    return this.db.select().from(staff).where(eq(staff.user_id, userId));
   }
 }

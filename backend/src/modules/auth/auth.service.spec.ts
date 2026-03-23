@@ -52,7 +52,9 @@ describe('AuthService', () => {
     const whereFn = jest.fn().mockReturnValue({ limit: limitFn });
     const fromFn = jest.fn().mockReturnValue({ where: whereFn });
     const selectFn = jest.fn().mockReturnValue({ from: fromFn });
-    const setFn = jest.fn().mockReturnValue({ where: jest.fn().mockResolvedValue(undefined) });
+    const setFn = jest
+      .fn()
+      .mockReturnValue({ where: jest.fn().mockResolvedValue(undefined) });
     const valuesFn = jest.fn().mockResolvedValue(undefined);
 
     mockDb = {
@@ -78,7 +80,10 @@ describe('AuthService', () => {
     it('should return token pair for valid credentials', async () => {
       (usersService.findByEmail as jest.Mock).mockResolvedValue(mockUser);
 
-      const result = await authService.login('test@example.com', 'Password123!');
+      const result = await authService.login(
+        'test@example.com',
+        'Password123!',
+      );
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
     });

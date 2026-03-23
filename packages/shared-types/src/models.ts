@@ -74,7 +74,6 @@ export interface User {
 
 export interface NewUser {
   email: string;
-  password_hash: string;
   display_name: string;
   is_active?: boolean;
 }

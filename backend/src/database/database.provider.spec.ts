@@ -19,7 +19,7 @@ describe('DatabaseModule', () => {
       ],
     }).compile();
 
-    const drizzle = module.get('DRIZZLE');
+    const drizzle: unknown = module.get('DRIZZLE');
     expect(drizzle).toBeDefined();
     await module.close();
   });

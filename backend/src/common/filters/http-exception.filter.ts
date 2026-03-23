@@ -52,7 +52,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   }
 
   private getSafeDetail(exception: HttpException, status: number): string {
-    if (status === HttpStatus.UNAUTHORIZED) {
+    if (status === (HttpStatus.UNAUTHORIZED as number)) {
       return 'Invalid email or password';
     }
     const response = exception.getResponse();
