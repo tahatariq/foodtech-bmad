@@ -6,7 +6,8 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "tsc",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "typescript": "~5.9.3"

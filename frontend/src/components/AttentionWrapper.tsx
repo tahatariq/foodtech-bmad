@@ -66,11 +66,12 @@ const reducedMotionStyles: Record<AttentionLevel, CSSProperties> = {
 };
 
 export function AttentionWrapper({ level, children }: AttentionWrapperProps) {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mq.matches);
     const handler = (e: MediaQueryListEvent) =>
       setPrefersReducedMotion(e.matches);
     mq.addEventListener('change', handler);
