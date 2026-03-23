@@ -64,6 +64,12 @@ temp/
 .nyc_output/
 jest_0*/
 
+# Turborepo
+.turbo/
+
+# Docker
+docker-data/
+
 # Local development
 .local/
 docker-compose.override.yml

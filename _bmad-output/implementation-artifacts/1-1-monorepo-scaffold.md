@@ -1,6 +1,6 @@
 # Story 1.1: Monorepo Scaffold & Development Environment
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -23,87 +23,87 @@ So that I have a working development environment to build all FoodTech features 
 
 ### Task 1: Initialize Root Monorepo Structure (AC: workspaces, tsconfig)
 
-- [ ] Create root `package.json` with npm workspaces configured for `backend`, `frontend`, `supplier-portal`, `packages/*`
-- [ ] Create `tsconfig.base.json` with TypeScript strict mode enabled (`strict: true`, `strictNullChecks: true`, `noUncheckedIndexedAccess: true`, `esModuleInterop: true`, target `ES2022`, module `ESNext`)
-- [ ] Create `.gitignore` with Node.js, Docker, IDE, and environment file exclusions
-- [ ] Create `.nvmrc` with `20` (Node.js 20 LTS)
-- [ ] Create `.prettierrc` and `.eslintrc.base.js` for consistent formatting across all packages
+- [x] Create root `package.json` with npm workspaces configured for `backend`, `frontend`, `supplier-portal`, `packages/*`
+- [x] Create `tsconfig.base.json` with TypeScript strict mode enabled (`strict: true`, `strictNullChecks: true`, `noUncheckedIndexedAccess: true`, `esModuleInterop: true`, target `ES2022`, module `ESNext`)
+- [x] Create `.gitignore` with Node.js, Docker, IDE, and environment file exclusions
+- [x] Create `.nvmrc` with `20` (Node.js 20 LTS)
+- [x] Create `.prettierrc` and `.eslintrc.base.js` for consistent formatting across all packages
 
 ### Task 2: Scaffold NestJS Backend (AC: backend on :3000, health endpoint)
 
-- [ ] Initialize NestJS 11.x project in `backend/` with `--strict` flag: `npx @nestjs/cli@latest new backend --strict --skip-git --package-manager npm`
-- [ ] Create `backend/tsconfig.json` extending `../tsconfig.base.json`
-- [ ] Add health check endpoint at `GET /api/v1/health` returning `{ "status": "ok", "timestamp": "<ISO8601>" }` with HTTP 200
-- [ ] Configure NestJS to listen on port 3000 (from `PORT` env var)
-- [ ] Add `@nestjs/config` for environment variable management
-- [ ] Create `backend/.env.example` with documented variables: `PORT`, `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`
-- [ ] Configure global API prefix `/api/v1`
-- [ ] Add Jest test configuration with a passing health controller test
+- [x] Initialize NestJS 11.x project in `backend/` with `--strict` flag: `npx @nestjs/cli@latest new backend --strict --skip-git --package-manager npm`
+- [x] Create `backend/tsconfig.json` extending `../tsconfig.base.json`
+- [x] Add health check endpoint at `GET /api/v1/health` returning `{ "status": "ok", "timestamp": "<ISO8601>" }` with HTTP 200
+- [x] Configure NestJS to listen on port 3000 (from `PORT` env var)
+- [x] Add `@nestjs/config` for environment variable management
+- [x] Create `backend/.env.example` with documented variables: `PORT`, `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`
+- [x] Configure global API prefix `/api/v1`
+- [x] Add Jest test configuration with a passing health controller test
 
 ### Task 3: Scaffold Vite + React Frontend (AC: frontend on :5173)
 
-- [ ] Initialize Vite 6.x + React 19 + TypeScript project in `frontend/`: `npm create vite@latest frontend -- --template react-ts`
-- [ ] Create `frontend/tsconfig.json` extending `../tsconfig.base.json`
-- [ ] Install and configure Tailwind CSS v4.2 with `@tailwindcss/vite` plugin
-- [ ] Install Radix UI v1.4.3: `npm install radix-ui`
-- [ ] Configure Vite dev server to run on port 5173
-- [ ] Add proxy configuration for API requests to backend at `http://localhost:3000`
-- [ ] Create minimal `App.tsx` with a "FoodTech" heading and connection status placeholder
-- [ ] Add Vitest configuration for frontend testing
+- [x] Initialize Vite 6.x + React 19 + TypeScript project in `frontend/`: `npm create vite@latest frontend -- --template react-ts`
+- [x] Create `frontend/tsconfig.json` extending `../tsconfig.base.json`
+- [x] Install and configure Tailwind CSS v4.2 with `@tailwindcss/vite` plugin
+- [x] Install Radix UI v1.4.3: `npm install radix-ui`
+- [x] Configure Vite dev server to run on port 5173
+- [x] Add proxy configuration for API requests to backend at `http://localhost:3000`
+- [x] Create minimal `App.tsx` with a "FoodTech" heading and connection status placeholder
+- [x] Add Vitest configuration for frontend testing
 
 ### Task 4: Scaffold Supplier Portal (AC: supplier-portal on :5174)
 
-- [ ] Initialize Vite 6.x + React 19 + TypeScript project in `supplier-portal/`: `npm create vite@latest supplier-portal -- --template react-ts`
-- [ ] Create `supplier-portal/tsconfig.json` extending `../tsconfig.base.json`
-- [ ] Install and configure Tailwind CSS v4.2 with `@tailwindcss/vite` plugin
-- [ ] Configure Vite dev server to run on port 5174
-- [ ] Add proxy configuration for API requests to backend
-- [ ] Create minimal `App.tsx` with "Supplier Portal" heading
-- [ ] Add Vitest configuration
+- [x] Initialize Vite 6.x + React 19 + TypeScript project in `supplier-portal/`: `npm create vite@latest supplier-portal -- --template react-ts`
+- [x] Create `supplier-portal/tsconfig.json` extending `../tsconfig.base.json`
+- [x] Install and configure Tailwind CSS v4.2 with `@tailwindcss/vite` plugin
+- [x] Configure Vite dev server to run on port 5174
+- [x] Add proxy configuration for API requests to backend
+- [x] Create minimal `App.tsx` with "Supplier Portal" heading
+- [x] Add Vitest configuration
 
 ### Task 5: Create shared-types Package (AC: importable from all packages)
 
-- [ ] Create `packages/shared-types/package.json` with name `@foodtech/shared-types`, main entry, and TypeScript build configuration
-- [ ] Create `packages/shared-types/tsconfig.json` extending `../../tsconfig.base.json`
-- [ ] Create `packages/shared-types/src/index.ts` as barrel export
-- [ ] Create `packages/shared-types/src/events.ts` with placeholder `FoodTechEvent<T>` interface
-- [ ] Create `packages/shared-types/src/models.ts` with placeholder domain types
-- [ ] Create `packages/shared-types/src/api.ts` with placeholder API types (RFC 7807 `ProblemDetail` type)
-- [ ] Verify `@foodtech/shared-types` is importable from `backend`, `frontend`, and `supplier-portal` via workspace resolution
+- [x] Create `packages/shared-types/package.json` with name `@foodtech/shared-types`, main entry, and TypeScript build configuration
+- [x] Create `packages/shared-types/tsconfig.json` extending `../../tsconfig.base.json`
+- [x] Create `packages/shared-types/src/index.ts` as barrel export
+- [x] Create `packages/shared-types/src/events.ts` with placeholder `FoodTechEvent<T>` interface
+- [x] Create `packages/shared-types/src/models.ts` with placeholder domain types
+- [x] Create `packages/shared-types/src/api.ts` with placeholder API types (RFC 7807 `ProblemDetail` type)
+- [x] Verify `@foodtech/shared-types` is importable from `backend`, `frontend`, and `supplier-portal` via workspace resolution
 
 ### Task 6: Configure Turborepo (AC: turbo.json orchestration)
 
-- [ ] Install Turborepo: `npm install turbo --save-dev` (at root)
-- [ ] Create `turbo.json` with pipeline definitions:
+- [x] Install Turborepo: `npm install turbo --save-dev` (at root)
+- [x] Create `turbo.json` with pipeline definitions:
   - `build`: depends on `^build` (topological), outputs `dist/**`
   - `test`: no dependencies, outputs `coverage/**`
   - `lint`: no dependencies, no outputs
   - `dev`: persistent, no cache
-- [ ] Add root `package.json` scripts: `turbo run build`, `turbo run test`, `turbo run lint`, `turbo run dev`
+- [x] Add root `package.json` scripts: `turbo run build`, `turbo run test`, `turbo run lint`, `turbo run dev`
 
 ### Task 7: Create Docker Compose Environment (AC: docker compose up starts all services)
 
-- [ ] Create `docker-compose.yml` with services:
+- [x] Create `docker-compose.yml` with services:
   - `postgres`: PostgreSQL 16, port 5432, volume for data persistence, healthcheck
   - `redis`: Redis 7.x, port 6379, healthcheck
   - `backend`: NestJS app, port 3000, depends on postgres + redis, volume mounts for hot-reload
   - `frontend`: Vite dev server, port 5173, volume mounts for HMR
   - `supplier-portal`: Vite dev server, port 5174, volume mounts for HMR
-- [ ] Create `backend/Dockerfile` (development target with hot-reload)
-- [ ] Create `frontend/Dockerfile` (development target with HMR)
-- [ ] Create `supplier-portal/Dockerfile` (development target with HMR)
-- [ ] Create root `.env.example` with `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `REDIS_URL`
+- [x] Create `backend/Dockerfile` (development target with hot-reload)
+- [x] Create `frontend/Dockerfile` (development target with HMR)
+- [x] Create `supplier-portal/Dockerfile` (development target with HMR)
+- [x] Create root `.env.example` with `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `REDIS_URL`
 - [ ] Verify `docker compose up` starts all services and health endpoint returns 200
 
 ### Task 8: GitHub Actions CI (AC: CI runs lint + test + build in parallel)
 
-- [ ] Create `.github/workflows/ci.yml` with:
+- [x] Create `.github/workflows/ci.yml` with:
   - Trigger on push to `main` and pull requests
   - Node.js 20 setup
   - npm ci install
   - Parallel jobs: `lint`, `test`, `build` (using Turborepo)
   - PostgreSQL and Redis service containers for integration tests
-- [ ] Verify workflow syntax is valid
+- [x] Verify workflow syntax is valid
 
 ## Dev Notes
 

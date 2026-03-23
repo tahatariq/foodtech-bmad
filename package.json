@@ -1,0 +1,25 @@
+{
+  "name": "foodtech",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FoodTech - Real-time kitchen operations platform",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "supplier-portal",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "dev": "turbo run dev"
+  },
+  "packageManager": "npm@11.9.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "turbo": "^2.8.20"
+  }
+}
