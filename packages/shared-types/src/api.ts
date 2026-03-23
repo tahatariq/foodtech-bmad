@@ -28,3 +28,23 @@ export interface HealthResponse {
   status: 'ok';
   timestamp: string;
 }
+
+/**
+ * Auth request/response types.
+ */
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface JwtPayload {
+  userId: string;
+  tenantId: string;
+  role: string;
+  email: string;
+}

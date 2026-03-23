@@ -1,6 +1,6 @@
 # Story 1.3: Staff Authentication & JWT Token Management
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -33,29 +33,29 @@ So that I can securely access my role-appropriate view.
 
 ### Task 1: Install Auth Dependencies (AC: JWT, bcrypt, Passport)
 
-- [ ] Install NestJS auth packages in `backend/`: `@nestjs/passport`, `@nestjs/jwt`, `passport`, `passport-jwt`, `@types/passport-jwt`
-- [ ] Install bcrypt: `bcryptjs`, `@types/bcryptjs`
-- [ ] Add `JWT_SECRET` and `JWT_REFRESH_SECRET` to `.env.example` with documentation
+- [x] Install NestJS auth packages in `backend/`: `@nestjs/passport`, `@nestjs/jwt`, `passport`, `passport-jwt`, `@types/passport-jwt`
+- [x] Install bcrypt: `bcryptjs`, `@types/bcryptjs`
+- [x] Add `JWT_SECRET` and `JWT_REFRESH_SECRET` to `.env.example` with documentation
 
 ### Task 2: Create Auth Module Structure (AC: all auth ACs)
 
-- [ ] Create `backend/src/modules/auth/auth.module.ts`:
+- [x] Create `backend/src/modules/auth/auth.module.ts`:
   - Imports `JwtModule.registerAsync()` with config from `ConfigService`
   - Imports `PassportModule.register({ defaultStrategy: 'jwt' })`
   - Imports `UsersModule` for user lookup
   - Exports `AuthService`, `JwtStrategy`
-- [ ] Create `backend/src/modules/auth/dto/login.dto.ts`:
+- [x] Create `backend/src/modules/auth/dto/login.dto.ts`:
   - `email`: string (validated with Zod — valid email format)
   - `password`: string (min 8 characters)
-- [ ] Create `backend/src/modules/auth/dto/refresh-token.dto.ts`:
+- [x] Create `backend/src/modules/auth/dto/refresh-token.dto.ts`:
   - `refreshToken`: string (required)
-- [ ] Create `backend/src/modules/auth/dto/auth-response.dto.ts`:
+- [x] Create `backend/src/modules/auth/dto/auth-response.dto.ts`:
   - `accessToken`: string
   - `refreshToken`: string
 
 ### Task 3: Implement Auth Service (AC: login, refresh, token generation)
 
-- [ ] Create `backend/src/modules/auth/auth.service.ts`:
+- [x] Create `backend/src/modules/auth/auth.service.ts`:
   - `login(email, password)`:
     - Look up user by email via `UsersService`
     - Compare password with bcrypt (`bcryptjs.compare()`, cost factor 12 hash)
@@ -69,69 +69,69 @@ So that I can securely access my role-appropriate view.
     - Invalidate the old refresh token
     - Return new token pair
   - `validateUser(payload)`: used by JwtStrategy to populate request.user
-- [ ] JWT access token payload: `{ userId: string, tenantId: string, role: string, email: string, type: 'access' }`
-- [ ] JWT refresh token payload: `{ userId: string, type: 'refresh', tokenId: string }`
+- [x] JWT access token payload: `{ userId: string, tenantId: string, role: string, email: string, type: 'access' }`
+- [x] JWT refresh token payload: `{ userId: string, type: 'refresh', tokenId: string }`
 
 ### Task 4: Create Refresh Token Storage (AC: refresh token rotation and invalidation)
 
-- [ ] Create `backend/src/database/schema/refresh-tokens.schema.ts`:
+- [x] Create `backend/src/database/schema/refresh-tokens.schema.ts`:
   - `id`: UUID v4 primary key
   - `user_id`: text, foreign key to `users.id`
   - `token_hash`: text, not null (bcrypt hash of the refresh token)
   - `expires_at`: timestamp, not null
   - `is_revoked`: boolean, default false
   - `created_at`: timestamp
-- [ ] Generate and run migration for the new table
-- [ ] Implement cleanup: revoke all tokens for a user on suspicious activity (e.g., reuse of revoked token)
+- [x] Generate and run migration for the new table
+- [x] Implement cleanup: revoke all tokens for a user on suspicious activity (e.g., reuse of revoked token)
 
 ### Task 5: Implement JWT Strategy and AuthGuard (AC: AuthGuard validates token, populates request.user)
 
-- [ ] Create `backend/src/modules/auth/strategies/jwt.strategy.ts`:
+- [x] Create `backend/src/modules/auth/strategies/jwt.strategy.ts`:
   - Extends `PassportStrategy(Strategy, 'jwt')`
   - Extracts JWT from `Authorization: Bearer <token>` header
   - Validates token using `JWT_SECRET`
   - Returns user payload: `{ userId, tenantId, role, email }`
-- [ ] Create `backend/src/common/guards/auth.guard.ts`:
+- [x] Create `backend/src/common/guards/auth.guard.ts`:
   - Extends `AuthGuard('jwt')` from `@nestjs/passport`
   - On failure, returns RFC 7807 error response with 401 status
   - Populates `request.user` with JWT payload on success
-- [ ] Create `backend/src/common/decorators/current-user.decorator.ts`:
+- [x] Create `backend/src/common/decorators/current-user.decorator.ts`:
   - `@CurrentUser()` parameter decorator that extracts `request.user`
   - Supports `@CurrentUser('userId')` for specific property extraction
 
 ### Task 6: Implement Auth Controller (AC: login and refresh endpoints)
 
-- [ ] Create `backend/src/modules/auth/auth.controller.ts`:
+- [x] Create `backend/src/modules/auth/auth.controller.ts`:
   - `POST /api/v1/auth/login` — accepts `LoginDto`, returns `AuthResponseDto`
   - `POST /api/v1/auth/refresh` — accepts `RefreshTokenDto`, returns `AuthResponseDto`
   - `POST /api/v1/auth/logout` — revokes refresh token (optional, good practice)
   - No authentication required on login/refresh endpoints
-- [ ] Apply Zod validation pipe to all DTOs
+- [x] Apply Zod validation pipe to all DTOs
 
 ### Task 7: Implement RFC 7807 Error Responses (AC: 401 in RFC 7807 format, no leaking)
 
-- [ ] Create `backend/src/common/filters/http-exception.filter.ts`:
+- [x] Create `backend/src/common/filters/http-exception.filter.ts`:
   - Global exception filter that formats all HTTP exceptions as RFC 7807 Problem Details
   - Response shape: `{ type: string, title: string, status: number, detail: string, instance: string }`
   - For 401: `type: "https://foodtech.app/errors/unauthorized"`, no user/token info in response
   - For invalid credentials: generic message "Invalid email or password" (no indication of which field is wrong)
-- [ ] Register filter globally in `app.module.ts`
-- [ ] Verify error responses never leak password hashes, user existence, or token details
+- [x] Register filter globally in `app.module.ts`
+- [x] Verify error responses never leak password hashes, user existence, or token details
 
 ### Task 8: Create Users Module (AC: user lookup for auth)
 
-- [ ] Create `backend/src/modules/users/users.module.ts`
-- [ ] Create `backend/src/modules/users/users.service.ts`:
+- [x] Create `backend/src/modules/users/users.module.ts`
+- [x] Create `backend/src/modules/users/users.service.ts`:
   - `findByEmail(email)`: returns user with staff roles
   - `findById(userId)`: returns user by ID
   - Queries use tenant scoping where applicable
-- [ ] Create `backend/src/modules/users/users.repository.ts`:
+- [x] Create `backend/src/modules/users/users.repository.ts`:
   - Drizzle queries for user lookup, joining with staff table for role info
-- [ ] Export `UsersModule` for use by `AuthModule`
+- [x] Export `UsersModule` for use by `AuthModule`
 
 ### Task 9: Add Auth Types to shared-types (AC: JWT payload type shared)
 
-- [ ] Add to `packages/shared-types/src/api.ts`:
+- [x] Add to `packages/shared-types/src/api.ts`:
   - `LoginRequest` type: `{ email: string, password: string }`
   - `AuthResponse` type: `{ accessToken: string, refreshToken: string }`
   - `JwtPayload` type: `{ userId: string, tenantId: string, role: StaffRole, email: string }`
@@ -210,9 +210,45 @@ backend/src/
 ## Dev Agent Record
 
 ### Agent Model Used
+Claude Opus 4.6
 
 ### Debug Log References
+N/A
 
 ### Completion Notes List
+- All 9 tasks implemented with 25 tests passing across all packages (22 backend, 2 frontend, 1 supplier-portal)
+- Auth module with Passport JWT strategy, JwtAuthGuard, @CurrentUser decorator
+- AuthService implements login (bcrypt compare), refresh (token rotation with reuse detection), validateUser
+- JWT access token: 15-min expiry with userId/tenantId/role/email payload
+- JWT refresh token: 7-day expiry with token rotation and invalidation tracking
+- refresh_tokens schema table with migration generated
+- Token reuse detection: revokes ALL user tokens when revoked token is reused
+- RFC 7807 HttpExceptionFilter registered globally — 401s return generic "Invalid email or password"
+- Security: same error message for invalid email and invalid password (no user enumeration)
+- UsersModule with repository pattern: findByEmail (with staff roles), findById
+- bcryptjs already installed from Story 1.2 (reused)
+- Shared types updated with LoginRequest, AuthResponse, JwtPayload
+- ProblemDetail type already existed in shared-types from Story 1.1
 
 ### File List
+- backend/package.json (modified — added @nestjs/passport, @nestjs/jwt, passport, passport-jwt, @types/passport-jwt)
+- backend/src/app.module.ts (modified — added AuthModule, HttpExceptionFilter)
+- backend/src/modules/auth/auth.module.ts
+- backend/src/modules/auth/auth.controller.ts
+- backend/src/modules/auth/auth.service.ts
+- backend/src/modules/auth/auth.service.spec.ts
+- backend/src/modules/auth/strategies/jwt.strategy.ts
+- backend/src/modules/auth/dto/login.dto.ts
+- backend/src/modules/auth/dto/refresh-token.dto.ts
+- backend/src/modules/auth/dto/auth-response.dto.ts
+- backend/src/modules/users/users.module.ts
+- backend/src/modules/users/users.service.ts
+- backend/src/modules/users/users.repository.ts
+- backend/src/common/guards/auth.guard.ts
+- backend/src/common/decorators/current-user.decorator.ts
+- backend/src/common/filters/http-exception.filter.ts
+- backend/src/common/filters/http-exception.filter.spec.ts
+- backend/src/database/schema/refresh-tokens.schema.ts
+- backend/src/database/schema/index.ts (modified — added refreshTokens export)
+- backend/src/database/migrations/0001_useful_stryfe.sql
+- packages/shared-types/src/api.ts (modified — added LoginRequest, AuthResponse, JwtPayload)
