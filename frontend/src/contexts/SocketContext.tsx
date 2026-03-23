@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useMemo } from 'react';
-import { useSocket, type ConnectionStatus } from '../hooks/useSocket';
+import { useSocket } from '../hooks/useSocket';
+import type { ConnectionStatus } from '../hooks/useSocket';
 import { Socket } from 'socket.io-client';
 
 interface SocketContextValue {
