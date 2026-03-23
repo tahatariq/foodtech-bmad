@@ -1,0 +1,44 @@
+/* Design tokens: Animation system */
+
+:root {
+  --ft-transition-fast: 150ms;
+  --ft-transition-normal: 250ms;
+  --ft-transition-slow: 400ms;
+  --ft-easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes ft-pulse-gentle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes ft-pulse-aggressive {
+  0%, 100% { opacity: 1; transform: scale(1.02); }
+  50% { opacity: 0.85; transform: scale(1); }
+}
+
+@keyframes ft-glow-amber {
+  0%, 100% { box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+  50% { box-shadow: 0 0 16px rgba(245, 158, 11, 0.6); }
+}
+
+@keyframes ft-glow-red {
+  0%, 100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.7); }
+}
+
+@keyframes ft-dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

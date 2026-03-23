@@ -1,0 +1,33 @@
+/* Design tokens: Spacing system */
+
+/* Kitchen spacing (sparse — larger touch targets, more whitespace) */
+[data-theme='kitchen'] {
+  --ft-space-1: 8px;
+  --ft-space-2: 12px;
+  --ft-space-3: 16px;
+  --ft-space-4: 24px;
+  --ft-space-5: 32px;
+  --ft-space-6: 40px;
+  --ft-space-7: 48px;
+  --ft-space-8: 64px;
+  --ft-target-size: 48px;
+  --ft-gap-default: 16px;
+  --ft-padding-card: 20px;
+  --ft-border-radius: 8px;
+}
+
+/* Office spacing (dense — tighter layout for desktop) */
+[data-theme='office'] {
+  --ft-space-1: 4px;
+  --ft-space-2: 8px;
+  --ft-space-3: 12px;
+  --ft-space-4: 16px;
+  --ft-space-5: 24px;
+  --ft-space-6: 32px;
+  --ft-space-7: 40px;
+  --ft-space-8: 48px;
+  --ft-target-size: 36px;
+  --ft-gap-default: 12px;
+  --ft-padding-card: 16px;
+  --ft-border-radius: 6px;
+}

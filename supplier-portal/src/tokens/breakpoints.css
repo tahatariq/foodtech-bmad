@@ -1,0 +1,13 @@
+/* Design tokens: Breakpoint system */
+
+:root {
+  /* Kitchen breakpoints (tablet-first) */
+  --ft-breakpoint-kitchen-sm: 768px;
+  --ft-breakpoint-kitchen-md: 1024px;
+  --ft-breakpoint-kitchen-lg: 1280px;
+
+  /* Office breakpoints (desktop-first) */
+  --ft-breakpoint-office-sm: 1024px;
+  --ft-breakpoint-office-md: 1280px;
+  --ft-breakpoint-office-lg: 1440px;
+}

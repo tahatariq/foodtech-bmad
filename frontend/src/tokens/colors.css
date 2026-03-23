@@ -1,0 +1,41 @@
+/* Design tokens: Color system */
+
+/* Kitchen theme (dark, high-contrast for kitchen displays) */
+[data-theme='kitchen'] {
+  --ft-bg-primary: #1a1d23;
+  --ft-bg-secondary: #23272f;
+  --ft-bg-surface: #2a2f38;
+  --ft-bg-elevated: #323842;
+  --ft-text-primary: #f1f3f5;
+  --ft-text-secondary: #adb5bd;
+  --ft-text-muted: #868e96;
+  --ft-border-default: #3a4150;
+  --ft-border-subtle: #2e3440;
+}
+
+/* Office theme (light, standard contrast for desktop) */
+[data-theme='office'] {
+  --ft-bg-primary: #f8f9fb;
+  --ft-bg-secondary: #ffffff;
+  --ft-bg-surface: #f1f3f5;
+  --ft-bg-elevated: #ffffff;
+  --ft-text-primary: #1a1d23;
+  --ft-text-secondary: #495057;
+  --ft-text-muted: #868e96;
+  --ft-border-default: #dee2e6;
+  --ft-border-subtle: #e9ecef;
+}
+
+/* Status colors (shared across themes) */
+:root {
+  --ft-status-healthy: #22c55e;
+  --ft-status-healthy-bg: rgba(34, 197, 94, 0.15);
+  --ft-status-watching: #3b82f6;
+  --ft-status-watching-bg: rgba(59, 130, 246, 0.15);
+  --ft-status-warning: #f59e0b;
+  --ft-status-warning-bg: rgba(245, 158, 11, 0.15);
+  --ft-status-critical: #ef4444;
+  --ft-status-critical-bg: rgba(239, 68, 68, 0.15);
+  --ft-status-resolved: #6366f1;
+  --ft-status-resolved-bg: rgba(99, 102, 241, 0.15);
+}

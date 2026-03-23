@@ -4,7 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 import { UsersService } from '../users/users.service';
-import { DRIZZLE, DrizzleDB } from '../../database/database.provider';
+import { DRIZZLE } from '../../database/database.provider';
+import type { DrizzleDB } from '../../database/database.provider';
 import { refreshTokens } from '../../database/schema/refresh-tokens.schema';
 import { users as usersTable } from '../../database/schema/users.schema';
 

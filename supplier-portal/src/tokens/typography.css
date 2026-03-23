@@ -1,0 +1,36 @@
+/* Design tokens: Typography system */
+
+:root {
+  --ft-font-primary: 'Inter', sans-serif;
+  --ft-font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Kitchen type scale (larger for readability at arm's length) */
+[data-theme='kitchen'] {
+  --ft-font-size-body: 18px;
+  --ft-line-height-body: 1.5;
+  --ft-font-size-heading: 24px;
+  --ft-line-height-heading: 1.3;
+  --ft-font-weight-heading: 600;
+  --ft-font-size-timer: 48px;
+  --ft-line-height-timer: 1.1;
+  --ft-font-weight-timer: 500;
+  --ft-font-size-label: 14px;
+  --ft-line-height-label: 1.4;
+  --ft-font-weight-label: 500;
+}
+
+/* Office type scale (standard for desktop viewing) */
+[data-theme='office'] {
+  --ft-font-size-body: 14px;
+  --ft-line-height-body: 1.5;
+  --ft-font-size-heading: 20px;
+  --ft-line-height-heading: 1.3;
+  --ft-font-weight-heading: 600;
+  --ft-font-size-timer: 32px;
+  --ft-line-height-timer: 1.1;
+  --ft-font-weight-timer: 500;
+  --ft-font-size-label: 12px;
+  --ft-line-height-label: 1.4;
+  --ft-font-weight-label: 500;
+}

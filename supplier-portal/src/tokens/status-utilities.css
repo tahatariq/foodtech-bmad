@@ -1,0 +1,44 @@
+/* Design tokens: Status utility classes with triple-encoding */
+
+.status-healthy {
+  --status-color: var(--ft-status-healthy);
+  --status-bg: var(--ft-status-healthy-bg);
+  background-color: var(--status-bg);
+  border-left: 3px solid var(--status-color);
+}
+
+.status-warning {
+  --status-color: var(--ft-status-warning);
+  --status-bg: var(--ft-status-warning-bg);
+  background-color: var(--status-bg);
+  border-left: 3px solid var(--status-color);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(245, 158, 11, 0.08) 4px,
+    rgba(245, 158, 11, 0.08) 8px
+  );
+}
+
+.status-critical {
+  --status-color: var(--ft-status-critical);
+  --status-bg: var(--ft-status-critical-bg);
+  background-color: var(--status-bg);
+  border-left: 3px solid var(--status-color);
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 4px,
+      rgba(239, 68, 68, 0.08) 4px,
+      rgba(239, 68, 68, 0.08) 8px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 4px,
+      rgba(239, 68, 68, 0.08) 4px,
+      rgba(239, 68, 68, 0.08) 8px
+    );
+}

@@ -114,27 +114,27 @@ async function seed() {
     {
       user_id: seedUsers[0].id,
       tenant_id: downtownId,
-      role: 'org_owner',
+      role: 'org_owner' as const,
     },
     {
       user_id: seedUsers[0].id,
       tenant_id: airportId,
-      role: 'org_owner',
+      role: 'org_owner' as const,
     },
     {
       user_id: seedUsers[1].id,
       tenant_id: downtownId,
-      role: 'head_chef',
+      role: 'head_chef' as const,
     },
     {
       user_id: seedUsers[2].id,
       tenant_id: downtownId,
-      role: 'line_cook',
+      role: 'line_cook' as const,
     },
     {
       user_id: seedUsers[3].id,
       tenant_id: airportId,
-      role: 'location_manager',
+      role: 'location_manager' as const,
     },
   ];
 
