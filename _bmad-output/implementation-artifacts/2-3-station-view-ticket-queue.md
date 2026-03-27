@@ -1,6 +1,6 @@
 # Story 2.3: Station View — Ticket Queue & Display
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -36,110 +36,110 @@ So that I always know what to cook next without searching.
 ## Tasks / Subtasks
 
 ### Task 1: Create StationView page component (AC 1, AC 4, AC 5, AC 6)
-- [ ] Create `frontend/src/views/StationView/StationView.tsx` as the main page component
-- [ ] Wrap entire view in `KitchenTokenProvider` for dark theme design tokens
-- [ ] Layout: single-column, portrait-optimized, full viewport height, dark background (`--kitchen-bg`)
-- [ ] Include `ConnectionIndicator` component fixed at top-right of view
-- [ ] Include station selector dropdown as the only UI chrome element (top of view)
-- [ ] Implement empty state: render "No tickets right now. Orders will appear here automatically." centered message when no tickets for station
-- [ ] Implement loading state: render 3 skeleton `TicketCard` placeholders while data fetches (animated shimmer)
-- [ ] Ensure no horizontal scrollbar — vertical-only scroll for ticket list
-- [ ] Create `frontend/src/views/StationView/index.ts` barrel re-export
+- [x] Create `frontend/src/views/StationView/StationView.tsx` as the main page component
+- [x] Wrap entire view in `KitchenTokenProvider` for dark theme design tokens
+- [x] Layout: single-column, portrait-optimized, full viewport height, dark background (`--kitchen-bg`)
+- [x] Include `ConnectionIndicator` component fixed at top-right of view
+- [x] Include station selector dropdown as the only UI chrome element (top of view)
+- [x] Implement empty state: render "No tickets right now. Orders will appear here automatically." centered message when no tickets for station
+- [x] Implement loading state: render 3 skeleton `TicketCard` placeholders while data fetches (animated shimmer)
+- [x] Ensure no horizontal scrollbar — vertical-only scroll for ticket list
+- [x] Create `frontend/src/views/StationView/index.ts` barrel re-export
 
 ### Task 2: Implement `useStationOrders` hook with TanStack Query (AC 1, AC 2)
-- [ ] Create `frontend/src/views/StationView/hooks/useStationOrders.ts`
-- [ ] Fetch orders via TanStack Query: `GET /api/v1/orders?stationId={stationId}`
-- [ ] Read `stationId` from Zustand `authStore` (user's assigned station)
-- [ ] Sort orders by urgency: compute elapsed time in current stage, oldest first (most urgent at top)
-- [ ] Return typed array of station-filtered orders with `isLoading`, `isError`, `data` states
-- [ ] Compute `elapsedMs` per ticket from stage entry timestamp for downstream use by AttentionWrapper
+- [x] Create `frontend/src/views/StationView/hooks/useStationOrders.ts`
+- [x] Fetch orders via TanStack Query: `GET /api/v1/orders?stationId={stationId}`
+- [x] Read `stationId` from Zustand `authStore` (user's assigned station)
+- [x] Sort orders by urgency: compute elapsed time in current stage, oldest first (most urgent at top)
+- [x] Return typed array of station-filtered orders with `isLoading`, `isError`, `data` states
+- [x] Compute `elapsedMs` per ticket from stage entry timestamp for downstream use by AttentionWrapper
 
 ### Task 3: Create TicketCard component (AC 3)
-- [ ] Create `frontend/src/components/kitchen/TicketCard/TicketCard.tsx`
-- [ ] Display order number in monospace, large font (24px+, `font-variant-numeric: tabular-nums`)
-- [ ] Display item list with quantities (e.g., "2x Ribeye Steak")
-- [ ] Display elapsed time in current stage (human-readable: "2m", "5m 30s") — update every second via `useInterval`
-- [ ] Display station label badge
-- [ ] Accept `variant` prop: `"station"` (large, full bump button) vs `"expeditor"` (compact) vs `"rail"` (mini)
-- [ ] Set `role="article"` and `aria-label="Order [number], [status], [time] elapsed"`
-- [ ] Create `frontend/src/components/kitchen/TicketCard/index.ts` barrel re-export
-- [ ] Create `frontend/src/components/kitchen/TicketCard/TicketCard.test.tsx`
+- [x] Create `frontend/src/components/kitchen/TicketCard/TicketCard.tsx`
+- [x] Display order number in monospace, large font (24px+, `font-variant-numeric: tabular-nums`)
+- [x] Display item list with quantities (e.g., "2x Ribeye Steak")
+- [x] Display elapsed time in current stage (human-readable: "2m", "5m 30s") — update every second via `useInterval`
+- [x] Display station label badge
+- [x] Accept `variant` prop: `"station"` (large, full bump button) vs `"expeditor"` (compact) vs `"rail"` (mini)
+- [x] Set `role="article"` and `aria-label="Order [number], [status], [time] elapsed"`
+- [x] Create `frontend/src/components/kitchen/TicketCard/index.ts` barrel re-export
+- [x] Create `frontend/src/components/kitchen/TicketCard/TicketCard.test.tsx`
 
 ### Task 4: Create AttentionWrapper HOC (AC 3)
-- [ ] Create `frontend/src/components/kitchen/AttentionWrapper/AttentionWrapper.tsx`
-- [ ] Accept `attentionLevel` prop: `'healthy' | 'watching' | 'warning' | 'critical' | 'resolved'`
-- [ ] Apply visual states:
+- [x] Create `frontend/src/components/kitchen/AttentionWrapper/AttentionWrapper.tsx`
+- [x] Accept `attentionLevel` prop: `'healthy' | 'watching' | 'warning' | 'critical' | 'resolved'`
+- [x] Apply visual states:
   - `healthy`: opacity 0.7, scale 1.0, no animation
   - `watching`: opacity 0.85, no animation
   - `warning`: opacity 1.0, scale 1.02, amber glow (`box-shadow: 0 0 12px rgba(245, 158, 11, 0.6)`), 2s CSS pulse animation
   - `critical`: opacity 1.0, scale 1.05, red glow (`box-shadow: 0 0 16px rgba(239, 68, 68, 0.7)`), 1s CSS pulse animation
   - `resolved`: brief green flash (0.3s), transition to healthy
-- [ ] Add `aria-live="assertive"` when transitioning to critical, `aria-live="polite"` for warning
-- [ ] Respect `prefers-reduced-motion`: disable pulse/glow animations, communicate via border/background color only
-- [ ] Create `frontend/src/components/kitchen/AttentionWrapper/index.ts` barrel re-export
-- [ ] Create `frontend/src/components/kitchen/AttentionWrapper/AttentionWrapper.test.tsx`
+- [x] Add `aria-live="assertive"` when transitioning to critical, `aria-live="polite"` for warning
+- [x] Respect `prefers-reduced-motion`: disable pulse/glow animations, communicate via border/background color only
+- [x] Create `frontend/src/components/kitchen/AttentionWrapper/index.ts` barrel re-export
+- [x] Create `frontend/src/components/kitchen/AttentionWrapper/AttentionWrapper.test.tsx`
 
 ### Task 5: Create `useAttention` hook for threshold calculation (AC 3)
-- [ ] Create `frontend/src/hooks/useAttention.ts`
-- [ ] Accept `elapsedMs: number` parameter
-- [ ] Return computed `attentionLevel` based on time in current stage:
+- [x] Create `frontend/src/hooks/useAttention.ts`
+- [x] Accept `elapsedMs: number` parameter
+- [x] Return computed `attentionLevel` based on time in current stage:
   - 0–3 min → `healthy`
   - 3–5 min → `watching`
   - 5–8 min → `warning`
   - 8+ min → `critical`
-- [ ] Make thresholds configurable via optional props (for different stage types)
-- [ ] Unit test: `frontend/src/hooks/useAttention.test.ts`
+- [x] Make thresholds configurable via optional props (for different stage types)
+- [x] Unit test: `frontend/src/hooks/useAttention.test.ts`
 
 ### Task 6: Create ConnectionIndicator component (AC 4)
-- [ ] Create `frontend/src/components/kitchen/ConnectionIndicator/ConnectionIndicator.tsx`
-- [ ] Display small colored dot (8px) + text:
+- [x] Create `frontend/src/components/kitchen/ConnectionIndicator/ConnectionIndicator.tsx`
+- [x] Display small colored dot (8px) + text:
   - `connected`: green dot (#22C55E), text "Connected" (or hide text to save space)
   - `reconnecting`: amber dot (#F59E0B), pulsing animation, "Reconnecting..." text
   - `offline`: red dot (#EF4444), "Offline — bumps will sync" text
-- [ ] Set `role="status"` and `aria-live="polite"` for screen reader announcements
-- [ ] Consume connection state from `useSocket()` hook or SocketContext
-- [ ] Create `frontend/src/components/kitchen/ConnectionIndicator/index.ts` barrel re-export
-- [ ] Create `frontend/src/components/kitchen/ConnectionIndicator/ConnectionIndicator.test.tsx`
+- [x] Set `role="status"` and `aria-live="polite"` for screen reader announcements
+- [x] Consume connection state from `useSocket()` hook or SocketContext
+- [x] Create `frontend/src/components/kitchen/ConnectionIndicator/index.ts` barrel re-export
+- [x] Create `frontend/src/components/kitchen/ConnectionIndicator/ConnectionIndicator.test.tsx`
 
 ### Task 7: Create station selector dropdown (AC 4)
-- [ ] Create dropdown component within StationView (or use Radix Select primitive)
-- [ ] Fetch available stations from `authStore` or API
-- [ ] Default to user's assigned station
-- [ ] On change, update the `stationId` filter in `useStationOrders` hook
-- [ ] 56dp+ touch target, high contrast styling consistent with dark theme
+- [x] Create dropdown component within StationView (or use Radix Select primitive)
+- [x] Fetch available stations from `authStore` or API
+- [x] Default to user's assigned station
+- [x] On change, update the `stationId` filter in `useStationOrders` hook
+- [x] 56dp+ touch target, high contrast styling consistent with dark theme
 
 ### Task 8: Create orders API client (AC 1)
-- [ ] Create `frontend/src/api/orders.api.ts`
-- [ ] Implement `getOrdersByStation(stationId: string): Promise<Order[]>` — GET `/api/v1/orders?stationId={stationId}`
-- [ ] Type request/response using shared-types package interfaces
-- [ ] Include auth token header via Axios/fetch interceptor from `authStore`
+- [x] Create `frontend/src/api/orders.api.ts`
+- [x] Implement `getOrdersByStation(stationId: string): Promise<Order[]>` — GET `/api/v1/orders?stationId={stationId}`
+- [x] Type request/response using shared-types package interfaces
+- [x] Include auth token header via Axios/fetch interceptor from `authStore`
 
 ### Task 9: Implement KitchenTokenProvider (AC 4)
-- [ ] Create `frontend/src/providers/KitchenTokenProvider.tsx`
-- [ ] Apply dark theme CSS custom properties via React context:
+- [x] Create `frontend/src/providers/KitchenTokenProvider.tsx`
+- [x] Apply dark theme CSS custom properties via React context:
   - `--kitchen-bg: #0F172A` (dark slate)
   - `--kitchen-surface: #1E293B`
   - `--kitchen-text: #F8FAFC` (high contrast white)
   - `--kitchen-text-secondary: #94A3B8`
   - Kitchen-optimized spacing, font sizes
-- [ ] Wrap children with the provider div that applies the CSS class/variables
+- [x] Wrap children with the provider div that applies the CSS class/variables
 
 ### Task 10: Configure React Router for Station View (AC 4)
-- [ ] Add route in `frontend/src/router.tsx`: `/station` path renders `StationView`
-- [ ] Implement role-based redirect: `line_cook` role redirects to `/station` on login
-- [ ] Read role and station assignment from Zustand `authStore`
-- [ ] Protect route: redirect to `/login` if not authenticated
+- [x] Add route in `frontend/src/router.tsx`: `/station` path renders `StationView`
+- [x] Implement role-based redirect: `line_cook` role redirects to `/station` on login
+- [x] Read role and station assignment from Zustand `authStore`
+- [x] Protect route: redirect to `/login` if not authenticated
 
 ### Task 11: Write tests (All ACs)
-- [ ] Test `StationView` renders only tickets for the assigned station (mock API response)
-- [ ] Test tickets are sorted by urgency (oldest in stage first)
-- [ ] Test TicketCard displays order number, items, elapsed time, station label
-- [ ] Test AttentionWrapper applies correct visual states at each time threshold
-- [ ] Test empty state message renders when ticket list is empty
-- [ ] Test skeleton loading state renders 3 shimmer placeholders
-- [ ] Test ConnectionIndicator renders correct state for connected/reconnecting/offline
-- [ ] Test WCAG: verify ARIA roles, labels, `aria-live` regions, touch target sizes (56dp+)
-- [ ] Test station selector dropdown changes filter
+- [x] Test `StationView` renders only tickets for the assigned station (mock API response)
+- [x] Test tickets are sorted by urgency (oldest in stage first)
+- [x] Test TicketCard displays order number, items, elapsed time, station label
+- [x] Test AttentionWrapper applies correct visual states at each time threshold
+- [x] Test empty state message renders when ticket list is empty
+- [x] Test skeleton loading state renders 3 shimmer placeholders
+- [x] Test ConnectionIndicator renders correct state for connected/reconnecting/offline
+- [x] Test WCAG: verify ARIA roles, labels, `aria-live` regions, touch target sizes (56dp+)
+- [x] Test station selector dropdown changes filter
 
 ## Dev Notes
 
@@ -193,6 +193,33 @@ frontend/src/stores/authStore.ts      # MODIFY — ensure stationId exposed
 ## Dev Agent Record
 
 ### Agent Model Used
+Claude Opus 4.6
+
 ### Debug Log References
+N/A
+
 ### Completion Notes List
+- All 11 tasks implemented with 32 frontend tests passing (13 new)
+- StationView: dark theme via KitchenTokenProvider, station selector dropdown, ConnectionIndicator, empty state, skeleton loading
+- TicketCard: order number (monospace), item list, elapsed time (updates every second), attention-driven styling
+- useAttention hook: configurable thresholds (healthy/watching/warning/critical)
+- useStationOrders hook with TanStack Query, sorted by urgency (oldest first)
+- Zustand authStore with login/logout/setStationId
+- orders.api.ts with fetchWithAuth helper
+- React Router with /station route
+- Tasks 4, 6, 9 reused from Story 1.6 (AttentionWrapper, ConnectionIndicator, KitchenTokenProvider)
+
 ### File List
+- frontend/src/views/StationView/StationView.tsx
+- frontend/src/views/StationView/StationView.test.tsx
+- frontend/src/views/StationView/hooks/useStationOrders.ts
+- frontend/src/views/StationView/index.ts
+- frontend/src/components/kitchen/TicketCard/TicketCard.tsx
+- frontend/src/components/kitchen/TicketCard/TicketCard.test.tsx
+- frontend/src/components/kitchen/TicketCard/index.ts
+- frontend/src/hooks/useAttention.ts
+- frontend/src/hooks/useAttention.test.ts
+- frontend/src/stores/authStore.ts
+- frontend/src/api/orders.api.ts
+- frontend/src/router.tsx
+- frontend/package.json (modified — added @tanstack/react-query, zustand, react-router-dom)

@@ -6,3 +6,4 @@ export {
   SkipTenantCheck,
   SKIP_TENANT_CHECK_KEY,
 } from './skip-tenant-check.decorator';
+export { TierGated, TIER_KEY, TIER_FEATURE_KEY } from './tier-gated.decorator';

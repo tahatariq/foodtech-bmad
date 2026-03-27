@@ -70,4 +70,38 @@ describe('AttentionWrapper', () => {
     expect(wrapper.style.animation).toBeFalsy();
     expect(wrapper).toHaveStyle({ borderWidth: '3px' });
   });
+
+  it('uses border styles for warning in reduced-motion mode', () => {
+    mockMatchMedia(true);
+    render(
+      <AttentionWrapper level="warning">
+        <span>child</span>
+      </AttentionWrapper>,
+    );
+    const wrapper = screen.getByTestId('attention-wrapper');
+    expect(wrapper.style.animation).toBeFalsy();
+    expect(wrapper).toHaveStyle({ borderWidth: '2px', borderStyle: 'solid' });
+  });
+
+  it('applies animation styles for warning when motion is allowed', () => {
+    mockMatchMedia(false);
+    render(
+      <AttentionWrapper level="warning">
+        <span>child</span>
+      </AttentionWrapper>,
+    );
+    const wrapper = screen.getByTestId('attention-wrapper');
+    expect(wrapper.style.animation).toBeTruthy();
+  });
+
+  it('applies animation styles for critical when motion is allowed', () => {
+    mockMatchMedia(false);
+    render(
+      <AttentionWrapper level="critical">
+        <span>child</span>
+      </AttentionWrapper>,
+    );
+    const wrapper = screen.getByTestId('attention-wrapper');
+    expect(wrapper.style.animation).toBeTruthy();
+  });
 });

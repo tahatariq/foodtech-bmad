@@ -8,6 +8,27 @@
       "when": 1774254055493,
       "tag": "0000_naive_marrow",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774594659424,
+      "tag": "0001_thin_mentallo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774595295715,
+      "tag": "0002_exotic_stark_industries",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774596616467,
+      "tag": "0003_colorful_outlaw_kid",
+      "breakpoints": true
     }
   ]
 }

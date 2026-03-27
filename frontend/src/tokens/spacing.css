@@ -12,8 +12,16 @@
   --ft-space-8: 64px;
   --ft-target-size: 48px;
   --ft-gap-default: 16px;
-  --ft-padding-card: 20px;
+  --ft-padding-card: 24px;
   --ft-border-radius: 8px;
+  --ft-bump-min-height: 56px;
+}
+
+/* High-contrast mode — thicker borders */
+@media (prefers-contrast: more) {
+  [data-theme='kitchen'] {
+    --ft-border-width: 2px;
+  }
 }
 
 /* Office spacing (dense — tighter layout for desktop) */

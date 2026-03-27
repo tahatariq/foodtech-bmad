@@ -1,6 +1,7 @@
-import type { CSSProperties } from 'react';
+import { useState, useEffect, type CSSProperties } from 'react';
+import { useOfflineStore } from '../stores/offlineStore';
 
-export type ConnectionState = 'connected' | 'reconnecting' | 'offline';
+export type ConnectionState = 'connected' | 'reconnecting' | 'offline' | 'stale';
 
 interface ConnectionIndicatorProps {
   status: ConnectionState;
@@ -14,7 +15,7 @@ const dotBase: CSSProperties = {
   flexShrink: 0,
 };
 
-const styles: Record<ConnectionState, { dot: CSSProperties; label: string }> = {
+const styleMap: Record<ConnectionState, { dot: CSSProperties; label: string }> = {
   connected: {
     dot: { ...dotBase, backgroundColor: '#22C55E' },
     label: '',
@@ -31,10 +32,54 @@ const styles: Record<ConnectionState, { dot: CSSProperties; label: string }> = {
     dot: { ...dotBase, backgroundColor: '#EF4444' },
     label: 'Offline \u2014 bumps will sync',
   },
+  stale: {
+    dot: {
+      ...dotBase,
+      backgroundColor: '#F59E0B',
+    },
+    label: 'Data may be delayed',
+  },
 };
 
+const STALE_THRESHOLD_MS = 30_000;
+
 export function ConnectionIndicator({ status }: ConnectionIndicatorProps) {
-  const { dot, label } = styles[status];
+  const queuedBumpCount = useOfflineStore((s) => s.queuedBumps.length);
+  const lastSyncTimestamp = useOfflineStore((s) => s.lastSyncTimestamp);
+  const reconnectAttempts = useOfflineStore((s) => s.reconnectAttempts);
+  const [isStale, setIsStale] = useState(false);
+
+  useEffect(() => {
+    if (status === 'connected' || status === 'reconnecting') {
+      const interval = setInterval(() => {
+        if (lastSyncTimestamp) {
+          const sinceLast = Date.now() - new Date(lastSyncTimestamp).getTime();
+          setIsStale(sinceLast >= STALE_THRESHOLD_MS);
+        }
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+    setIsStale(false);
+  }, [status, lastSyncTimestamp]);
+
+  // Determine effective display state
+  let effectiveStatus = status;
+  if (status === 'connected' && isStale) {
+    effectiveStatus = 'stale';
+  }
+
+  // Level 1: suppress reconnecting UI for first 3 attempts
+  if (status === 'reconnecting' && reconnectAttempts <= 3) {
+    effectiveStatus = 'connected';
+  }
+
+  const { dot, label: baseLabel } = styleMap[effectiveStatus];
+
+  // Append queued bump count to offline label
+  let label = baseLabel;
+  if (effectiveStatus === 'offline' && queuedBumpCount > 0) {
+    label = `Offline \u2014 ${queuedBumpCount} bump${queuedBumpCount !== 1 ? 's' : ''} will sync`;
+  }
 
   return (
     <div

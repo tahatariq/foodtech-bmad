@@ -21,6 +21,21 @@ export type UserRole =
 
 export type SupplierOrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered';
 
+export interface TierLimits {
+  maxLocations: number;
+  maxStaff: number;
+  supplierApi: boolean;
+  supplierPortal: boolean;
+  sso: boolean;
+}
+
+export type TierFeature =
+  | 'SUPPLIER_API'
+  | 'SUPPLIER_PORTAL'
+  | 'SSO'
+  | 'UNLIMITED_LOCATIONS'
+  | 'UNLIMITED_STAFF';
+
 export type AttentionLevel = 'healthy' | 'watching' | 'warning' | 'critical' | 'resolved';
 
 export type StaffRole = UserRole;

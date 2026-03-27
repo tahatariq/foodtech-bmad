@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { getTenantNamespace } from '@foodtech/shared-types';
+import { useOfflineStore } from '../stores/offlineStore';
+import { bumpOrder } from '../api/orders.api';
 
 export type ConnectionStatus = 'connected' | 'reconnecting' | 'disconnected';
 
@@ -8,6 +10,27 @@ interface UseSocketOptions {
   tenantId: string;
   token: string;
   serverUrl?: string;
+}
+
+async function replayQueuedBumps() {
+  const store = useOfflineStore.getState();
+  const bumps = [...store.queuedBumps];
+
+  for (const bump of bumps) {
+    try {
+      await bumpOrder(bump.orderId);
+      store.dequeueBump(bump.orderId);
+    } catch (error: unknown) {
+      const status = (error as { status?: number })?.status;
+      if (status === 409) {
+        // Conflict: server state wins, remove from queue
+        store.dequeueBump(bump.orderId);
+      } else {
+        // Keep in queue for next reconnect attempt
+        store.incrementRetryCount(bump.orderId);
+      }
+    }
+  }
 }
 
 export function useSocket({ tenantId, token, serverUrl = '' }: UseSocketOptions) {
@@ -34,21 +57,34 @@ export function useSocket({ tenantId, token, serverUrl = '' }: UseSocketOptions)
     newSocket.on('connect', () => {
       setSocket(newSocket);
       setConnectionStatus('connected');
+      const store = useOfflineStore.getState();
+      store.setOffline(false);
+      store.resetReconnectAttempts();
+      store.setLastSyncTimestamp(new Date().toISOString());
       newSocket.emit('request:state-sync');
     });
 
     newSocket.on('disconnect', () => {
       setConnectionStatus('disconnected');
+      useOfflineStore.getState().setOffline(true);
     });
 
     newSocket.on('reconnecting', () => {
       setConnectionStatus('reconnecting');
+      useOfflineStore.getState().incrementReconnectAttempts();
     });
 
     newSocket.on('reconnect', () => {
       setSocket(newSocket);
       setConnectionStatus('connected');
+      const store = useOfflineStore.getState();
+      store.setOffline(false);
+      store.resetReconnectAttempts();
+      store.setLastSyncTimestamp(new Date().toISOString());
       newSocket.emit('request:state-sync');
+
+      // Replay queued bumps sequentially
+      replayQueuedBumps();
     });
 
     return () => {

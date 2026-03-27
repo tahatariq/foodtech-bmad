@@ -17,3 +17,12 @@ export const staffRoleEnum = pgEnum('staff_role', [
   'supplier_api',
   'system_admin',
 ]);
+
+export const orderStatusEnum = pgEnum('order_status', [
+  'received',
+  'preparing',
+  'plating',
+  'served',
+  'completed',
+  'cancelled',
+]);

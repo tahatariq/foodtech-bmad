@@ -39,3 +39,29 @@
   --ft-status-resolved: #6366f1;
   --ft-status-resolved-bg: rgba(99, 102, 241, 0.15);
 }
+
+/* High-contrast mode overrides (WCAG AAA target — 7:1 ratio) */
+@media (prefers-contrast: more) {
+  [data-theme='kitchen'] {
+    --ft-bg-primary: #000000;
+    --ft-bg-secondary: #0a0a0a;
+    --ft-bg-surface: #111111;
+    --ft-bg-elevated: #1a1a1a;
+    --ft-text-primary: #ffffff;
+    --ft-text-secondary: #e0e0e0;
+    --ft-text-muted: #c0c0c0;
+    --ft-border-default: #ffffff;
+    --ft-border-subtle: #cccccc;
+  }
+
+  :root {
+    --ft-status-healthy: #00ff7f;
+    --ft-status-healthy-bg: rgba(0, 255, 127, 0.2);
+    --ft-status-warning: #ffd700;
+    --ft-status-warning-bg: rgba(255, 215, 0, 0.2);
+    --ft-status-critical: #ff4444;
+    --ft-status-critical-bg: rgba(255, 68, 68, 0.2);
+    --ft-status-watching: #66b3ff;
+    --ft-status-watching-bg: rgba(102, 179, 255, 0.2);
+  }
+}

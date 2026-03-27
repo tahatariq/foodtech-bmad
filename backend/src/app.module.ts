@@ -6,9 +6,15 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { GatewaysModule } from './gateways/gateways.module';
+import { TenantsModule } from './modules/tenants/tenants.module';
+import { StationsModule } from './modules/stations/stations.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { KitchenStatusModule } from './modules/kitchen-status/kitchen-status.module';
+import { TempoModule } from './modules/tempo/tempo.module';
 import { JwtAuthGuard } from './common/guards/auth.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { TierGuard } from './common/guards/tier.guard';
 import { TenantScopeInterceptor } from './common/interceptors/tenant-scope.interceptor';
 import { TenantContextService } from './common/services/tenant-context.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -21,6 +27,11 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     DatabaseModule,
     AuthModule,
     GatewaysModule,
+    TenantsModule,
+    StationsModule,
+    OrdersModule,
+    KitchenStatusModule,
+    TempoModule,
   ],
   controllers: [AppController],
   providers: [
@@ -37,6 +48,10 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: TierGuard,
     },
     {
       provide: APP_INTERCEPTOR,

@@ -31,6 +31,10 @@ export const INVENTORY_EVENTS = {
   UN_EIGHTY_SIXED: 'inventory.un86d',
 } as const;
 
+export const KITCHEN_EVENTS = {
+  STATUS_CHANGED: 'kitchen.status.changed',
+} as const;
+
 export const SYSTEM_EVENTS = {
   CONNECTION_STATUS: 'system.connection.status',
   STATE_SYNC: 'system.state.sync',

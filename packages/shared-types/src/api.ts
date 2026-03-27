@@ -48,3 +48,14 @@ export interface JwtPayload {
   role: string;
   email: string;
 }
+
+export interface TierRestrictedError extends ProblemDetail {
+  requiredTier?: string;
+  currentTier?: string;
+}
+
+export interface UpgradeGuidance {
+  currentTier: string;
+  requiredTier: string;
+  upgradeUrl: string;
+}
