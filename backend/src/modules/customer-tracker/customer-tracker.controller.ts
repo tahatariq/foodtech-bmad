@@ -2,7 +2,9 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { CustomerTrackerService } from './customer-tracker.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { SkipTenantCheck } from '../../common/decorators/skip-tenant-check.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Customer Tracking')
 @Controller('track')
 @Public()
 @SkipTenantCheck()

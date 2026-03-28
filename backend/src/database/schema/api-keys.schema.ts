@@ -14,6 +14,7 @@ export const apiKeys = pgTable(
     secret_hash: text('secret_hash').notNull(),
     is_active: boolean('is_active').notNull().default(true),
     revoked_at: timestamp('revoked_at', { withTimezone: true }),
+    grace_period_until: timestamp('grace_period_until', { withTimezone: true }),
     ...timestamps(),
   },
   (table) => [

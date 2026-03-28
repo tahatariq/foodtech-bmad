@@ -8,7 +8,9 @@ import {
 } from '@nestjs/common';
 import { SimulatorService } from './simulator.service';
 import { CurrentUser, Roles, SkipTenantCheck } from '../../common/decorators';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Simulator')
 @Controller('simulator')
 export class SimulatorController {
   constructor(private readonly service: SimulatorService) {}

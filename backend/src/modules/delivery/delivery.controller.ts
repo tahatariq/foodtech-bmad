@@ -11,7 +11,9 @@ import {
 import { DeliveryService } from './delivery.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { SkipTenantCheck } from '../../common/decorators/skip-tenant-check.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Delivery')
 @Controller('delivery')
 @Public()
 @SkipTenantCheck()

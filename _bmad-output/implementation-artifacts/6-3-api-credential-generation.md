@@ -1,6 +1,6 @@
 # Story 6.3: API Credential Generation for POS Integration
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

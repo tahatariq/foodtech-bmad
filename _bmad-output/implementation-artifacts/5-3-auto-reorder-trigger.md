@@ -1,6 +1,6 @@
 # Story 5.3: Auto-Reorder Trigger & Supplier Notification
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

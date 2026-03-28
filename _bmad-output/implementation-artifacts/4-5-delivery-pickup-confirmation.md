@@ -1,6 +1,6 @@
 # Story 4.5: Delivery Pickup Confirmation & Queue Prioritization
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 5.6: Supplier Order Status in Kitchen Views
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

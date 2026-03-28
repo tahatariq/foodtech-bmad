@@ -1,6 +1,6 @@
 # Story 5.1: Supplier Data Model & Restaurant Linking
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

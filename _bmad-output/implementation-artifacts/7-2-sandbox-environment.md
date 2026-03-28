@@ -1,6 +1,6 @@
 # Story 7.2: Sandbox Environment for Integration Testing
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

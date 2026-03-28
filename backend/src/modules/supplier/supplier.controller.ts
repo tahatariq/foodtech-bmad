@@ -28,7 +28,9 @@ import {
   type BatchConfirmDto,
 } from './dto/batch-confirm.dto';
 import { batchRouteSchema, type BatchRouteDto } from './dto/batch-route.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Supplier')
 @Controller()
 export class SupplierController {
   constructor(

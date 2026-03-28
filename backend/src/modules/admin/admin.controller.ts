@@ -24,7 +24,9 @@ import {
   type ActivateTenantDto,
 } from './dto/activate-tenant.dto';
 import { importMenuSchema, type ImportMenuDto } from './dto/import-menu.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Admin')
 @Controller('admin')
 export class AdminController {
   constructor(

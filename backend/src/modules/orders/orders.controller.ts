@@ -16,8 +16,10 @@ import * as QRCode from 'qrcode';
 import { OrdersService } from './orders.service';
 import { CurrentUser, TenantScoped, Roles } from '../../common/decorators';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+import { ApiTags } from '@nestjs/swagger';
 import { createOrderSchema, type CreateOrderDto } from './dto/create-order.dto';
 
+@ApiTags('Orders')
 @Controller('orders')
 @TenantScoped()
 export class OrdersController {

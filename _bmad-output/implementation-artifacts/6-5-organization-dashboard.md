@@ -1,6 +1,6 @@
 # Story 6.5: Organization Dashboard & Multi-Location Views
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

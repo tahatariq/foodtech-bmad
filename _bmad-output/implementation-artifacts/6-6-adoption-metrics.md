@@ -1,6 +1,6 @@
 # Story 6.6: Adoption Metrics & Monitoring Dashboard
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

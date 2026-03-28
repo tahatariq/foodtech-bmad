@@ -1,6 +1,6 @@
 # Story 5.5: Supplier Consumption Trends & Demand Intelligence
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

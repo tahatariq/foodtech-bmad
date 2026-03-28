@@ -21,7 +21,9 @@ import {
   type AddChecklistItemDto,
   type ToggleChecklistItemDto,
 } from './dto/create-checklist.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Kitchen Status')
 @Controller('kitchen-status')
 @TenantScoped()
 export class StationStatusController {

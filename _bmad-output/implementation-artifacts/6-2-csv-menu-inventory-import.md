@@ -1,6 +1,6 @@
 # Story 6.2: CSV Menu & Inventory Import
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

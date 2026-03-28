@@ -1,6 +1,6 @@
 # Story 4.2: Customer Tracker -- Real-Time Status Page
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

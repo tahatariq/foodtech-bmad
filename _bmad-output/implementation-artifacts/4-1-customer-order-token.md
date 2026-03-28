@@ -1,6 +1,6 @@
 # Story 4.1: Customer Order Token & Tracking Link Generation
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

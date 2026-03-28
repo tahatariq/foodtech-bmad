@@ -20,7 +20,9 @@ import {
   updateInventorySchema,
   type UpdateInventoryDto,
 } from './dto/update-inventory.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Kitchen Status')
 @Controller('inventory-items')
 @TenantScoped()
 export class KitchenStatusController {

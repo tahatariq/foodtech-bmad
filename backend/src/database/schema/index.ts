@@ -18,3 +18,4 @@ export {
   supplierOrders,
 } from './suppliers.schema';
 export { apiKeys } from './api-keys.schema';
+export { webhookSubscriptions, webhookDeadLetters } from './webhooks.schema';

@@ -24,7 +24,9 @@ import {
   updateStageThresholdsSchema,
   type UpdateStageThresholdsDto,
 } from './dto/update-stage-thresholds.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Stations')
 @Controller('stations')
 @TenantScoped()
 export class StationsController {

@@ -1,6 +1,6 @@
 # Story 6.7: Subscription Tier Management & Feature Gates
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

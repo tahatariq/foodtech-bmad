@@ -1,4 +1,4 @@
-import { pgTable, text, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, boolean, timestamp, index } from 'drizzle-orm/pg-core';
 import { primaryId, timestamps, isActiveColumn } from '../utils/schema-helpers';
 import { organizations } from './organizations.schema';
 
@@ -13,6 +13,8 @@ export const locations = pgTable(
     address: text('address'),
     timezone: text('timezone').notNull().default('UTC'),
     api_key: text('api_key'),
+    is_sandbox: boolean('is_sandbox').notNull().default(false),
+    last_activity_at: timestamp('last_activity_at', { withTimezone: true }),
     is_active: isActiveColumn(),
     ...timestamps(),
   },

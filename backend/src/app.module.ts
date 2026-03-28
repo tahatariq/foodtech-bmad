@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
@@ -16,6 +17,8 @@ import { DeliveryModule } from './modules/delivery/delivery.module';
 import { SupplierModule } from './modules/supplier/supplier.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { SimulatorModule } from './modules/simulator/simulator.module';
+import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { SandboxModule } from './modules/sandbox/sandbox.module';
 import { JwtAuthGuard } from './common/guards/auth.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -29,6 +32,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     AuthModule,
     GatewaysModule,
@@ -42,6 +46,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     SupplierModule,
     AdminModule,
     SimulatorModule,
+    IntegrationsModule,
+    SandboxModule,
   ],
   controllers: [AppController],
   providers: [

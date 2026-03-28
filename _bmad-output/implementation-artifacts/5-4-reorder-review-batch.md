@@ -1,6 +1,6 @@
 # Story 5.4: Reorder Review, Confirmation & Batch Operations
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

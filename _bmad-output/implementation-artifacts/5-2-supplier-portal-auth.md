@@ -1,6 +1,6 @@
 # Story 5.2: Supplier Portal Authentication & Dashboard
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

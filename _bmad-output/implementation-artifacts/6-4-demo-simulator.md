@@ -1,6 +1,6 @@
 # Story 6.4: Demo Simulator
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { eq, and, count, ne } from 'drizzle-orm';
 import { Roles, SkipTenantCheck } from '../../common/decorators';
+import { ApiTags } from '@nestjs/swagger';
 import { DRIZZLE, type DrizzleDB } from '../../database/database.provider';
 import { locations } from '../../database/schema/locations.schema';
 import { organizations } from '../../database/schema/organizations.schema';
@@ -42,6 +43,7 @@ export interface OrgAnalytics {
   }[];
 }
 
+@ApiTags('Organizations')
 @Controller('organizations')
 export class OrganizationsController {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}

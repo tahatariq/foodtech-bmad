@@ -1,7 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { TempoService } from './tempo.service';
 import { CurrentUser, TenantScoped, Roles } from '../../common/decorators';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Tempo')
 @Controller('tempo')
 @TenantScoped()
 export class TempoController {

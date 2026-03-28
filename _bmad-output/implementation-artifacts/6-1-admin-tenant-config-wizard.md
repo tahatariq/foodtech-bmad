@@ -1,6 +1,6 @@
 # Story 6.1: Admin Tenant Configuration Wizard
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
