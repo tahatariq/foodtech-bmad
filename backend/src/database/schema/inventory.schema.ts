@@ -19,6 +19,7 @@ export const inventoryItems = pgTable(
     item_name: text('item_name').notNull(),
     current_quantity: integer('current_quantity').notNull().default(0),
     reorder_threshold: integer('reorder_threshold').notNull().default(0),
+    reorder_quantity: integer('reorder_quantity').notNull().default(0),
     is_86d: boolean('is_86d').notNull().default(false),
     tenant_id: text('tenant_id')
       .notNull()

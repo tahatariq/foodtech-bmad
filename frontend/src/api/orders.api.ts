@@ -98,3 +98,16 @@ export interface TempoData {
 export async function getTempo(): Promise<TempoData> {
   return fetchWithAuth(`${API_BASE}/tempo`);
 }
+
+export interface SupplierOrder {
+  id: string;
+  supplierName: string;
+  items: { itemName: string; quantity: number }[];
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered';
+  expectedDelivery?: string;
+  createdAt: string;
+}
+
+export async function getSupplierOrders(): Promise<SupplierOrder[]> {
+  return fetchWithAuth(`${API_BASE}/kitchen-status/supplier-orders`);
+}

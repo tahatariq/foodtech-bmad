@@ -13,6 +13,7 @@ import { KitchenStatusModule } from './modules/kitchen-status/kitchen-status.mod
 import { TempoModule } from './modules/tempo/tempo.module';
 import { CustomerTrackerModule } from './modules/customer-tracker/customer-tracker.module';
 import { DeliveryModule } from './modules/delivery/delivery.module';
+import { SupplierModule } from './modules/supplier/supplier.module';
 import { JwtAuthGuard } from './common/guards/auth.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -36,6 +37,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     TempoModule,
     CustomerTrackerModule,
     DeliveryModule,
+    SupplierModule,
   ],
   controllers: [AppController],
   providers: [
