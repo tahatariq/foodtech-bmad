@@ -2,6 +2,7 @@ import {
   pgTable,
   text,
   integer,
+  boolean,
   index,
   unique,
   timestamp,
@@ -44,6 +45,7 @@ export const orders = pgTable(
     id: primaryId(),
     order_number: text('order_number').notNull(),
     status: orderStatusEnum('status').notNull().default('received'),
+    is_simulated: boolean('is_simulated').notNull().default(false),
     tracking_token: text('tracking_token'),
     tracking_token_expires_at: timestamp('tracking_token_expires_at', {
       withTimezone: true,

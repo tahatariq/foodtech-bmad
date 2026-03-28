@@ -27,6 +27,34 @@ const DeliveryBoard = lazy(
     })),
 );
 
+const OnboardingWizard = lazy(
+  () =>
+    import('./views/admin/OnboardingWizard').then((m) => ({
+      default: m.OnboardingWizard,
+    })),
+);
+
+const SimulatorPanel = lazy(
+  () =>
+    import('./views/admin/SimulatorPanel').then((m) => ({
+      default: m.SimulatorPanel,
+    })),
+);
+
+const ManagementConsole = lazy(
+  () =>
+    import('./views/management/ManagementConsole').then((m) => ({
+      default: m.ManagementConsole,
+    })),
+);
+
+const AdoptionDashboard = lazy(
+  () =>
+    import('./views/admin/AdoptionDashboard').then((m) => ({
+      default: m.AdoptionDashboard,
+    })),
+);
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -57,6 +85,38 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<div>Loading...</div>}>
         <DeliveryBoard />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/admin',
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <OnboardingWizard />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/admin/simulator',
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <SimulatorPanel />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/management',
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <ManagementConsole />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/admin/adoption',
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <AdoptionDashboard />
       </Suspense>
     ),
   },

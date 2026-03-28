@@ -17,3 +17,4 @@ export {
   supplierRestaurantLinks,
   supplierOrders,
 } from './suppliers.schema';
+export { apiKeys } from './api-keys.schema';
