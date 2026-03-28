@@ -3,6 +3,7 @@ import {
   OrderStagesController,
 } from './stations.controller';
 import { StationsService } from './stations.service';
+import { NotFoundException } from '@nestjs/common';
 
 describe('StationsController', () => {
   let controller: StationsController;
@@ -268,17 +269,15 @@ describe('OrderStagesController', () => {
     });
 
     it('should propagate NotFoundException from service', async () => {
-      const { NotFoundException: NestNotFoundException } =
-        await import('@nestjs/common');
       mockService.updateStageThresholds.mockRejectedValue(
-        new NestNotFoundException('Stage not found'),
+        new NotFoundException('Stage not found'),
       );
 
       await expect(
         controller.updateThresholds('tenant-1', 'bad-id', {
           warningThresholdMinutes: 5,
         }),
-      ).rejects.toThrow(NestNotFoundException);
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should pass empty dto', async () => {
