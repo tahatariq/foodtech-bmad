@@ -162,12 +162,20 @@ foodtech-bmad/
 ├── backend/                        # NestJS API server
 │   ├── src/
 │   │   ├── modules/               # Feature modules
+│   │   │   ├── admin/             # Tenant onboarding & management
 │   │   │   ├── auth/              # Authentication & RBAC
+│   │   │   ├── customer-tracker/  # Customer order tracking
+│   │   │   ├── delivery/          # Delivery partner integration
+│   │   │   ├── integrations/      # Webhooks & API keys
+│   │   │   ├── kitchen-status/    # Inventory & prep checklists
 │   │   │   ├── orders/            # Order lifecycle engine
+│   │   │   ├── sandbox/           # Sandbox environment
+│   │   │   ├── simulator/         # Demo order simulator
 │   │   │   ├── stations/          # Station management
+│   │   │   ├── supplier/          # Supplier portal & auto-reorder
 │   │   │   ├── tempo/             # Service Tempo calculation
 │   │   │   ├── tenants/           # Multi-tenant management
-│   │   │   └── kitchen-status/    # Inventory & prep checklists
+│   │   │   └── users/             # User management
 │   │   ├── common/                # Shared utilities
 │   │   ├── gateways/              # WebSocket handlers
 │   │   └── database/              # Drizzle ORM setup
@@ -261,9 +269,9 @@ npm run test           # Run tests
 
 ### Test Coverage
 
-- **Backend**: 114 unit tests (Jest) + E2E tests
-- **Frontend**: 115 component tests (Vitest)
-- **Supplier Portal**: 1 component test
+- **Backend**: 201 unit tests (Jest) + E2E tests
+- **Frontend**: 180 component tests (Vitest)
+- **Supplier Portal**: component tests (Vitest)
 
 ### Running Tests
 

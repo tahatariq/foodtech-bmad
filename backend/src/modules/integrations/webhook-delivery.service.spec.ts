@@ -193,7 +193,7 @@ describe('WebhookDeliveryService', () => {
     mockFetch.mockRejectedValue(new Error('Connection refused'));
 
     // Call the private deliverToSubscription with attempt = 2 (last attempt)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const svc = service as any;
     await svc.deliverToSubscription(
       sub,
@@ -204,5 +204,291 @@ describe('WebhookDeliveryService', () => {
 
     // After final attempt fails, dead letter should be inserted
     expect(mockDb.insert).toHaveBeenCalled();
+  });
+
+  it('should produce different signatures for different bodies', () => {
+    const secret = 'same-secret';
+    const sig1 = service.computeHmac('{"event":"a"}', secret);
+    const sig2 = service.computeHmac('{"event":"b"}', secret);
+
+    expect(sig1).not.toBe(sig2);
+  });
+
+  it('should record success on successful delivery', async () => {
+    jest.useRealTimers();
+
+    const sub = {
+      id: 'sub-1',
+      tenant_id: 'tenant-1',
+      url: 'https://a.com/hook',
+      events: ['order.created'],
+      secret: 'secret-1',
+      is_active: true,
+      delivery_count: 0,
+      success_count: 0,
+      last_delivery_at: null,
+    };
+
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+    const svc = service as any;
+    await svc.deliverToSubscription(sub, 'order.created', { orderId: '1' }, 0);
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockDb.update).toHaveBeenCalled();
+  });
+
+  it('should record delivery on failed attempt', async () => {
+    jest.useRealTimers();
+
+    const sub = {
+      id: 'sub-1',
+      tenant_id: 'tenant-1',
+      url: 'https://a.com/hook',
+      events: ['order.created'],
+      secret: 'secret-1',
+      is_active: true,
+      delivery_count: 0,
+      success_count: 0,
+      last_delivery_at: null,
+    };
+
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    const svc = service as any;
+    await svc.deliverToSubscription(sub, 'order.created', {}, 0);
+
+    // Should record delivery (failure)
+    expect(mockDb.update).toHaveBeenCalled();
+  });
+
+  it('should throw on non-ok HTTP response and retry', async () => {
+    jest.useRealTimers();
+
+    const sub = {
+      id: 'sub-1',
+      tenant_id: 'tenant-1',
+      url: 'https://a.com/hook',
+      events: ['order.created'],
+      secret: 'secret-1',
+      is_active: true,
+      delivery_count: 0,
+      success_count: 0,
+      last_delivery_at: null,
+    };
+
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
+
+    const svc = service as any;
+    await svc.deliverToSubscription(sub, 'order.created', {}, 0);
+
+    // Should have called fetch and recorded delivery
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockDb.update).toHaveBeenCalled();
+  });
+
+  it('should move to dead letter on final non-ok HTTP response', async () => {
+    jest.useRealTimers();
+
+    const sub = {
+      id: 'sub-1',
+      tenant_id: 'tenant-1',
+      url: 'https://a.com/hook',
+      events: ['order.created'],
+      secret: 'secret-1',
+      is_active: true,
+      delivery_count: 0,
+      success_count: 0,
+      last_delivery_at: null,
+    };
+
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 502,
+      statusText: 'Bad Gateway',
+    });
+
+    const svc = service as any;
+    await svc.deliverToSubscription(sub, 'order.created', {}, 2);
+
+    expect(mockDb.insert).toHaveBeenCalled();
+  });
+
+  it('should not deliver when no subscriptions match', async () => {
+    mockDb.select.mockReturnValue({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockResolvedValue([]),
+      }),
+    });
+
+    await service.deliverEvent('tenant-1', 'order.created', {});
+    await Promise.resolve();
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('should retry dead letter - happy path', async () => {
+    jest.useRealTimers();
+
+    const dl = {
+      id: 'dl-1',
+      subscription_id: 'sub-1',
+      event_type: 'order.created',
+      payload: { orderId: '123' },
+      error: 'Connection refused',
+      attempts: 3,
+      created_at: new Date(),
+    };
+
+    const sub = {
+      id: 'sub-1',
+      tenant_id: 'tenant-1',
+      url: 'https://a.com/hook',
+      events: ['order.created'],
+      secret: 'secret-1',
+      is_active: true,
+      delivery_count: 5,
+      success_count: 3,
+      last_delivery_at: null,
+    };
+
+    // First select returns dead letter, second returns subscription
+    mockDb.select
+      .mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([dl]),
+        }),
+      })
+      .mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([sub]),
+        }),
+      });
+
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+    await service.retryDeadLetter('dl-1');
+
+    // Dead letter should be deleted
+    expect(mockDb.delete).toHaveBeenCalled();
+  });
+
+  it('should not retry dead letter when dead letter not found', async () => {
+    mockDb.select.mockReturnValue({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockResolvedValue([]),
+      }),
+    });
+
+    await service.retryDeadLetter('nonexistent');
+
+    // Should not attempt delete or fetch
+    expect(mockDb.delete).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('should not retry dead letter when subscription is inactive', async () => {
+    jest.useRealTimers();
+
+    const dl = {
+      id: 'dl-1',
+      subscription_id: 'sub-1',
+      event_type: 'order.created',
+      payload: { orderId: '123' },
+      error: 'Timeout',
+      attempts: 3,
+      created_at: new Date(),
+    };
+
+    const inactiveSub = {
+      id: 'sub-1',
+      tenant_id: 'tenant-1',
+      url: 'https://a.com/hook',
+      events: ['order.created'],
+      secret: 'secret-1',
+      is_active: false,
+      delivery_count: 5,
+      success_count: 3,
+      last_delivery_at: null,
+    };
+
+    mockDb.select
+      .mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([dl]),
+        }),
+      })
+      .mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([inactiveSub]),
+        }),
+      });
+
+    await service.retryDeadLetter('dl-1');
+
+    // Should not delete or fetch since sub is inactive
+    expect(mockDb.delete).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('should not retry dead letter when subscription not found', async () => {
+    jest.useRealTimers();
+
+    const dl = {
+      id: 'dl-1',
+      subscription_id: 'sub-gone',
+      event_type: 'order.created',
+      payload: {},
+      error: 'Timeout',
+      attempts: 3,
+      created_at: new Date(),
+    };
+
+    mockDb.select
+      .mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([dl]),
+        }),
+      })
+      .mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([]),
+        }),
+      });
+
+    await service.retryDeadLetter('dl-1');
+
+    expect(mockDb.delete).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('should include X-FoodTech-Signature header in delivery', async () => {
+    jest.useRealTimers();
+
+    const sub = {
+      id: 'sub-1',
+      tenant_id: 'tenant-1',
+      url: 'https://a.com/hook',
+      events: ['order.created'],
+      secret: 'my-secret',
+      is_active: true,
+      delivery_count: 0,
+      success_count: 0,
+      last_delivery_at: null,
+    };
+
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+    const svc = service as any;
+    await svc.deliverToSubscription(sub, 'order.created', { id: '1' }, 0);
+
+    const fetchCall = mockFetch.mock.calls[0];
+    expect(fetchCall[1].headers['X-FoodTech-Signature']).toBeDefined();
+    expect(fetchCall[1].headers['Content-Type']).toBe('application/json');
+    expect(fetchCall[1].method).toBe('POST');
   });
 });

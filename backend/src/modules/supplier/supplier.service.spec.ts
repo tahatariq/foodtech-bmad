@@ -416,5 +416,353 @@ describe('SupplierService', () => {
         ]),
       ).rejects.toThrow(ForbiddenException);
     });
+
+    it('should handle multiple groups with multiple orders each', async () => {
+      const orders = [
+        {
+          id: 'order-1',
+          supplier_id: supplierId,
+          location_id: 'loc-1',
+          items: [],
+          status: 'confirmed' as const,
+          deliver_by: null,
+          confirmed_at: new Date(),
+          shipped_at: null,
+          delivered_at: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 'order-2',
+          supplier_id: supplierId,
+          location_id: 'loc-2',
+          items: [],
+          status: 'confirmed' as const,
+          deliver_by: null,
+          confirmed_at: new Date(),
+          shipped_at: null,
+          delivered_at: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 'order-3',
+          supplier_id: supplierId,
+          location_id: 'loc-1',
+          items: [],
+          status: 'confirmed' as const,
+          deliver_by: null,
+          confirmed_at: new Date(),
+          shipped_at: null,
+          delivered_at: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ];
+
+      repository.findSupplierOrdersBySupplier.mockResolvedValue(orders);
+      repository.batchRouteOrders.mockResolvedValue([
+        {
+          orderId: 'order-1',
+          deliveryTime: '2026-03-29T10:00:00Z',
+          status: 'shipped',
+        },
+        {
+          orderId: 'order-2',
+          deliveryTime: '2026-03-29T14:00:00Z',
+          status: 'shipped',
+        },
+        {
+          orderId: 'order-3',
+          deliveryTime: '2026-03-29T14:00:00Z',
+          status: 'shipped',
+        },
+      ]);
+
+      const result = await service.batchRouteOrders(supplierId, [
+        { orderIds: ['order-1'], deliveryTime: '2026-03-29T10:00:00Z' },
+        {
+          orderIds: ['order-2', 'order-3'],
+          deliveryTime: '2026-03-29T14:00:00Z',
+        },
+      ]);
+
+      expect(result.routed).toBe(3);
+      expect(eventBus.emit).toHaveBeenCalledTimes(3);
+    });
+
+    it('should throw ForbiddenException when batch contains mixed valid and invalid orders', async () => {
+      const orders = [
+        {
+          id: 'order-1',
+          supplier_id: supplierId,
+          location_id: 'loc-1',
+          items: [],
+          status: 'confirmed' as const,
+          deliver_by: null,
+          confirmed_at: new Date(),
+          shipped_at: null,
+          delivered_at: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ];
+
+      repository.findSupplierOrdersBySupplier.mockResolvedValue(orders);
+
+      await expect(
+        service.batchRouteOrders(supplierId, [
+          {
+            orderIds: ['order-1', 'order-invalid'],
+            deliveryTime: '2026-03-29T10:00:00Z',
+          },
+        ]),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should not emit events for routed orders that are not found in supplier orders', async () => {
+      const orders = [
+        {
+          id: 'order-1',
+          supplier_id: supplierId,
+          location_id: 'loc-1',
+          items: [],
+          status: 'confirmed' as const,
+          deliver_by: null,
+          confirmed_at: new Date(),
+          shipped_at: null,
+          delivered_at: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ];
+
+      repository.findSupplierOrdersBySupplier.mockResolvedValue(orders);
+      // Simulate a result with an order ID that doesn't match any supplier order
+      repository.batchRouteOrders.mockResolvedValue([
+        {
+          orderId: 'order-1',
+          deliveryTime: '2026-03-29T10:00:00Z',
+          status: 'shipped',
+        },
+        {
+          orderId: 'order-phantom',
+          deliveryTime: '2026-03-29T10:00:00Z',
+          status: 'shipped',
+        },
+      ]);
+
+      const result = await service.batchRouteOrders(supplierId, [
+        { orderIds: ['order-1'], deliveryTime: '2026-03-29T10:00:00Z' },
+      ]);
+
+      expect(result.routed).toBe(2);
+      // Only one event emitted because order-phantom is not found in orders list
+      expect(eventBus.emit).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getActiveSupplierOrdersForLocation', () => {
+    it('should delegate to repository', async () => {
+      const mockOrders = [
+        {
+          id: 'order-1',
+          items: [],
+          status: 'pending',
+          supplier_name: 'Fresh Foods',
+        },
+      ];
+      repository.findActiveSupplierOrdersForLocation.mockResolvedValue(
+        mockOrders as any,
+      );
+
+      const result = await service.getActiveSupplierOrdersForLocation('loc-1');
+
+      expect(
+        repository.findActiveSupplierOrdersForLocation,
+      ).toHaveBeenCalledWith('loc-1');
+      expect(result).toEqual(mockOrders);
+    });
+
+    it('should return empty array when no active orders', async () => {
+      repository.findActiveSupplierOrdersForLocation.mockResolvedValue([]);
+
+      const result = await service.getActiveSupplierOrdersForLocation('loc-1');
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getDemandData - edge cases', () => {
+    it('should handle multiple linked restaurants with threshold items', async () => {
+      repository.countPendingOrdersBySupplier.mockResolvedValue(1);
+      repository.getLinkedRestaurants.mockResolvedValue([
+        {
+          linkId: 'link-1',
+          locationId: 'loc-1',
+          locationName: 'Kitchen A',
+          address: null,
+          organizationId: 'org-1',
+        },
+        {
+          linkId: 'link-2',
+          locationId: 'loc-2',
+          locationName: 'Kitchen B',
+          address: null,
+          organizationId: 'org-1',
+        },
+      ]);
+      repository.getApproachingThresholdItems.mockResolvedValue([
+        {
+          id: 'item-1',
+          item_name: 'Salmon',
+          current_quantity: 2,
+          reorder_threshold: 5,
+          tenant_id: 'loc-1',
+        },
+        {
+          id: 'item-2',
+          item_name: 'Tuna',
+          current_quantity: 1,
+          reorder_threshold: 3,
+          tenant_id: 'loc-2',
+        },
+      ]);
+
+      const result = await service.getDemandData(supplierId);
+
+      expect(result.pendingReordersCount).toBe(1);
+      expect(result.approachingThresholdItems).toHaveLength(2);
+      expect(repository.getApproachingThresholdItems).toHaveBeenCalledWith([
+        'loc-1',
+        'loc-2',
+      ]);
+    });
+  });
+
+  describe('getTrends - edge cases', () => {
+    it('should not include items with zero quantity in trendingUp', async () => {
+      const items = [
+        {
+          id: 'item-1',
+          item_name: 'Out of stock',
+          current_quantity: 0,
+          reorder_threshold: 10,
+          is_86d: true,
+          tenant_id: 'loc-1',
+        },
+      ];
+      repository.getInventoryForLinkedRestaurants.mockResolvedValue(items);
+      repository.get86dItemsForLinkedRestaurants.mockResolvedValue([]);
+
+      const result = await service.getTrends(supplierId);
+
+      expect(result.trendingUp).toHaveLength(0);
+    });
+
+    it('should not include items well above threshold in trendingUp', async () => {
+      const items = [
+        {
+          id: 'item-1',
+          item_name: 'Well stocked',
+          current_quantity: 100,
+          reorder_threshold: 10,
+          is_86d: false,
+          tenant_id: 'loc-1',
+        },
+      ];
+      repository.getInventoryForLinkedRestaurants.mockResolvedValue(items);
+      repository.get86dItemsForLinkedRestaurants.mockResolvedValue([]);
+
+      const result = await service.getTrends(supplierId);
+
+      // 100 > 10*1.5=15, so not trending
+      expect(result.trendingUp).toHaveLength(0);
+    });
+
+    it('should include item exactly at 1.5x threshold in trendingUp', async () => {
+      const items = [
+        {
+          id: 'item-1',
+          item_name: 'Borderline',
+          current_quantity: 15,
+          reorder_threshold: 10,
+          is_86d: false,
+          tenant_id: 'loc-1',
+        },
+      ];
+      repository.getInventoryForLinkedRestaurants.mockResolvedValue(items);
+      repository.get86dItemsForLinkedRestaurants.mockResolvedValue([]);
+
+      const result = await service.getTrends(supplierId);
+
+      // 15 <= 10*1.5=15, so trending
+      expect(result.trendingUp).toHaveLength(1);
+    });
+
+    it('should return empty arrays when no inventory data', async () => {
+      repository.getInventoryForLinkedRestaurants.mockResolvedValue([]);
+      repository.get86dItemsForLinkedRestaurants.mockResolvedValue([]);
+
+      const result = await service.getTrends(supplierId);
+
+      expect(result.inventoryLevels).toEqual([]);
+      expect(result.trendingUp).toEqual([]);
+      expect(result.frequently86d).toEqual([]);
+    });
+  });
+
+  describe('batchConfirmOrders - edge cases', () => {
+    it('should handle empty confirmed list with empty invalidIds (no-op)', async () => {
+      repository.batchConfirmOrders.mockResolvedValue({
+        confirmed: [],
+        invalidIds: [],
+      });
+
+      const result = await service.batchConfirmOrders(supplierId, []);
+
+      expect(result).toEqual({ confirmed: 0, failed: 0 });
+      expect(eventBus.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getSupplierOrders - edge cases', () => {
+    it('should return empty array when supplier has no orders', async () => {
+      repository.findSupplierOrdersBySupplier.mockResolvedValue([]);
+
+      const result = await service.getSupplierOrders(supplierId);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return multiple orders', async () => {
+      const mockOrders = [
+        {
+          id: 'order-1',
+          supplier_id: supplierId,
+          status: 'pending',
+          items: [],
+        },
+        {
+          id: 'order-2',
+          supplier_id: supplierId,
+          status: 'confirmed',
+          items: [],
+        },
+        {
+          id: 'order-3',
+          supplier_id: supplierId,
+          status: 'shipped',
+          items: [],
+        },
+      ];
+      repository.findSupplierOrdersBySupplier.mockResolvedValue(
+        mockOrders as any,
+      );
+
+      const result = await service.getSupplierOrders(supplierId);
+
+      expect(result).toHaveLength(3);
+    });
   });
 });

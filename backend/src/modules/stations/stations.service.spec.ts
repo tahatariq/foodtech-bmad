@@ -165,5 +165,206 @@ describe('StationsService', () => {
         { warning_threshold_minutes: 10 },
       );
     });
+
+    it('should update only critical threshold when warning not provided', async () => {
+      mockRepository.findOrderStageById.mockResolvedValue({
+        id: 'stage-1',
+        name: 'received',
+        tenant_id: 'tenant-1',
+      });
+      mockRepository.updateOrderStageThresholds.mockResolvedValue({
+        id: 'stage-1',
+        warning_threshold_minutes: 5,
+        critical_threshold_minutes: 15,
+      });
+
+      await service.updateStageThresholds('tenant-1', 'stage-1', {
+        criticalThresholdMinutes: 15,
+      });
+
+      expect(mockRepository.updateOrderStageThresholds).toHaveBeenCalledWith(
+        'stage-1',
+        { critical_threshold_minutes: 15 },
+      );
+    });
+
+    it('should pass empty object when no thresholds provided', async () => {
+      mockRepository.findOrderStageById.mockResolvedValue({
+        id: 'stage-1',
+        name: 'received',
+        tenant_id: 'tenant-1',
+      });
+      mockRepository.updateOrderStageThresholds.mockResolvedValue({
+        id: 'stage-1',
+        warning_threshold_minutes: 5,
+        critical_threshold_minutes: 8,
+      });
+
+      await service.updateStageThresholds('tenant-1', 'stage-1', {});
+
+      expect(mockRepository.updateOrderStageThresholds).toHaveBeenCalledWith(
+        'stage-1',
+        {},
+      );
+    });
+
+    it('should call findOrderStageById with correct tenantId and stageId', async () => {
+      mockRepository.findOrderStageById.mockResolvedValue({
+        id: 'stage-abc',
+        name: 'cooking',
+        tenant_id: 'tenant-xyz',
+      });
+      mockRepository.updateOrderStageThresholds.mockResolvedValue({
+        id: 'stage-abc',
+      });
+
+      await service.updateStageThresholds('tenant-xyz', 'stage-abc', {
+        warningThresholdMinutes: 3,
+      });
+
+      expect(mockRepository.findOrderStageById).toHaveBeenCalledWith(
+        'stage-abc',
+        'tenant-xyz',
+      );
+    });
+
+    it('should include correct error detail in NotFoundException', async () => {
+      mockRepository.findOrderStageById.mockResolvedValue(null);
+
+      try {
+        await service.updateStageThresholds('tenant-1', 'missing-id', {
+          warningThresholdMinutes: 5,
+        });
+        fail('Expected NotFoundException');
+      } catch (err) {
+        expect(err).toBeInstanceOf(NotFoundException);
+        const response = (err as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          type: 'https://foodtech.app/errors/not-found',
+          title: 'Stage Not Found',
+          status: 404,
+          detail: 'Order stage missing-id not found.',
+        });
+      }
+    });
+  });
+
+  describe('createStation edge cases', () => {
+    it('should create a station without optional emoji', async () => {
+      const expected = {
+        id: 'station-2',
+        name: 'Prep',
+        emoji: undefined,
+        display_order: 0,
+        tenant_id: 'tenant-1',
+      };
+      mockRepository.createStation.mockResolvedValue(expected);
+
+      const result = await service.createStation('tenant-1', {
+        name: 'Prep',
+        displayOrder: 0,
+      });
+
+      expect(result).toEqual(expected);
+      expect(mockRepository.createStation).toHaveBeenCalledWith({
+        name: 'Prep',
+        emoji: undefined,
+        display_order: 0,
+        tenant_id: 'tenant-1',
+      });
+    });
+
+    it('should pass the correct tenant_id for different tenants', async () => {
+      mockRepository.createStation.mockResolvedValue({ id: 'station-3' });
+
+      await service.createStation('tenant-other', {
+        name: 'Salad',
+        displayOrder: 2,
+      });
+
+      expect(mockRepository.createStation).toHaveBeenCalledWith(
+        expect.objectContaining({ tenant_id: 'tenant-other' }),
+      );
+    });
+  });
+
+  describe('findAllStations edge cases', () => {
+    it('should return empty array when no stations exist', async () => {
+      mockRepository.findStationsByTenant.mockResolvedValue([]);
+
+      const result = await service.findAllStations('tenant-empty');
+      expect(result).toEqual([]);
+      expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('createOrderStages edge cases', () => {
+    it('should map stages with correct tenant_id', async () => {
+      mockRepository.deleteOrderStagesByTenant.mockResolvedValue(undefined);
+      mockRepository.createOrderStages.mockResolvedValue([]);
+
+      await service.createOrderStages('tenant-99', {
+        stages: [
+          { name: 'new', sequence: 0 },
+          { name: 'cooking', sequence: 1 },
+          { name: 'done', sequence: 2 },
+        ],
+      });
+
+      expect(mockRepository.createOrderStages).toHaveBeenCalledWith([
+        { name: 'new', sequence: 0, tenant_id: 'tenant-99' },
+        { name: 'cooking', sequence: 1, tenant_id: 'tenant-99' },
+        { name: 'done', sequence: 2, tenant_id: 'tenant-99' },
+      ]);
+    });
+
+    it('should delete existing stages before creating new ones', async () => {
+      mockRepository.deleteOrderStagesByTenant.mockResolvedValue(undefined);
+      mockRepository.createOrderStages.mockResolvedValue([]);
+
+      await service.createOrderStages('tenant-1', {
+        stages: [{ name: 'received', sequence: 0 }],
+      });
+
+      const deleteCall =
+        mockRepository.deleteOrderStagesByTenant.mock.invocationCallOrder[0];
+      const createCall =
+        mockRepository.createOrderStages.mock.invocationCallOrder[0];
+      expect(deleteCall).toBeLessThan(createCall);
+    });
+
+    it('should handle single stage', async () => {
+      const singleStage = [
+        { id: '1', name: 'received', sequence: 0, tenant_id: 'tenant-1' },
+      ];
+      mockRepository.deleteOrderStagesByTenant.mockResolvedValue(undefined);
+      mockRepository.createOrderStages.mockResolvedValue(singleStage);
+
+      const result = await service.createOrderStages('tenant-1', {
+        stages: [{ name: 'received', sequence: 0 }],
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('received');
+    });
+  });
+
+  describe('findOrderStages edge cases', () => {
+    it('should return empty array when no stages exist', async () => {
+      mockRepository.findOrderStagesByTenant.mockResolvedValue([]);
+
+      const result = await service.findOrderStages('tenant-empty');
+      expect(result).toEqual([]);
+    });
+
+    it('should pass the correct tenantId to repository', async () => {
+      mockRepository.findOrderStagesByTenant.mockResolvedValue([]);
+
+      await service.findOrderStages('tenant-abc');
+
+      expect(mockRepository.findOrderStagesByTenant).toHaveBeenCalledWith(
+        'tenant-abc',
+      );
+    });
   });
 });

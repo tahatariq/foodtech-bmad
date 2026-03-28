@@ -145,5 +145,125 @@ describe('AutoReorderService', () => {
       expect(repository.createSupplierOrder).not.toHaveBeenCalled();
       expect(eventBus.emit).not.toHaveBeenCalled();
     });
+
+    it('should pass correct items array to createSupplierOrder', async () => {
+      repository.findPendingOrderForItem.mockResolvedValue(null);
+      repository.findLinkedSupplierForLocation.mockResolvedValue({
+        supplierId: 'supplier-1',
+        linkId: 'link-1',
+      });
+      repository.createSupplierOrder.mockResolvedValue({
+        id: 'order-new',
+        supplier_id: 'supplier-1',
+        location_id: tenantId,
+        status: 'pending',
+        items: [
+          {
+            itemName: 'Salmon',
+            quantity: 3,
+            reorderThreshold: 5,
+          },
+        ],
+        created_at: new Date(),
+        updated_at: new Date(),
+        deliver_by: null,
+        confirmed_at: null,
+        shipped_at: null,
+        delivered_at: null,
+      });
+
+      await service.handleReorderCheck(tenantId, reorderPayload);
+
+      expect(repository.createSupplierOrder).toHaveBeenCalledWith({
+        supplier_id: 'supplier-1',
+        location_id: tenantId,
+        items: [
+          {
+            itemName: 'Salmon',
+            quantity: 3,
+            reorderThreshold: 5,
+          },
+        ],
+        status: 'pending',
+      });
+    });
+
+    it('should use the correct tenant ID in the emitted event', async () => {
+      const customTenantId = 'loc-custom';
+      repository.findPendingOrderForItem.mockResolvedValue(null);
+      repository.findLinkedSupplierForLocation.mockResolvedValue({
+        supplierId: 'supplier-2',
+        linkId: 'link-2',
+      });
+      repository.createSupplierOrder.mockResolvedValue({
+        id: 'order-custom',
+        supplier_id: 'supplier-2',
+        location_id: customTenantId,
+        status: 'pending',
+        items: [],
+        created_at: new Date(),
+        updated_at: new Date(),
+        deliver_by: null,
+        confirmed_at: null,
+        shipped_at: null,
+        delivered_at: null,
+      });
+
+      await service.handleReorderCheck(customTenantId, {
+        itemId: 'item-2',
+        itemName: 'Tuna',
+        currentQuantity: 1,
+        reorderThreshold: 3,
+      });
+
+      expect(eventBus.emit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tenantId: customTenantId,
+          payload: expect.objectContaining({
+            supplierId: 'supplier-2',
+            itemName: 'Tuna',
+            locationId: customTenantId,
+          }),
+        }),
+      );
+    });
+
+    it('should return the created order object on success', async () => {
+      repository.findPendingOrderForItem.mockResolvedValue(null);
+      repository.findLinkedSupplierForLocation.mockResolvedValue({
+        supplierId: 'supplier-1',
+        linkId: 'link-1',
+      });
+      const createdOrder = {
+        id: 'order-returned',
+        supplier_id: 'supplier-1',
+        location_id: tenantId,
+        status: 'pending' as const,
+        items: [],
+        created_at: new Date(),
+        updated_at: new Date(),
+        deliver_by: null,
+        confirmed_at: null,
+        shipped_at: null,
+        delivered_at: null,
+      };
+      repository.createSupplierOrder.mockResolvedValue(createdOrder);
+
+      const result = await service.handleReorderCheck(tenantId, reorderPayload);
+
+      expect(result).toEqual(createdOrder);
+      expect(result?.id).toBe('order-returned');
+    });
+
+    it('should not call findLinkedSupplierForLocation when duplicate exists', async () => {
+      repository.findPendingOrderForItem.mockResolvedValue({
+        id: 'existing-order',
+        status: 'pending',
+      } as any);
+
+      await service.handleReorderCheck(tenantId, reorderPayload);
+
+      expect(repository.findLinkedSupplierForLocation).not.toHaveBeenCalled();
+    });
   });
 });

@@ -161,4 +161,172 @@ describe('WebhookService', () => {
     expect(result.url).toBe('https://new.example.com/hook');
     expect(result.events).toEqual(['order.created', 'order.completed']);
   });
+
+  it('should throw NotFoundException when updating non-existent subscription', async () => {
+    mockDb.update.mockReturnValue({
+      set: jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnValue({
+          returning: jest.fn().mockResolvedValue([]),
+        }),
+      }),
+    });
+
+    await expect(
+      service.updateSubscription('nonexistent', { url: 'https://x.com' }),
+    ).rejects.toThrow(NotFoundException);
+  });
+
+  it('should update subscription with only url', async () => {
+    mockDb.update.mockReturnValue({
+      set: jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnValue({
+          returning: jest.fn().mockResolvedValue([
+            {
+              id: 'wh-1',
+              url: 'https://updated.com/hook',
+              events: ['order.created'],
+              is_active: true,
+            },
+          ]),
+        }),
+      }),
+    });
+
+    const result = await service.updateSubscription('wh-1', {
+      url: 'https://updated.com/hook',
+    });
+
+    expect(result.url).toBe('https://updated.com/hook');
+    expect(result.is_active).toBe(true);
+  });
+
+  it('should update subscription with only events', async () => {
+    mockDb.update.mockReturnValue({
+      set: jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnValue({
+          returning: jest.fn().mockResolvedValue([
+            {
+              id: 'wh-1',
+              url: 'https://example.com/hook',
+              events: ['order.completed'],
+              is_active: true,
+            },
+          ]),
+        }),
+      }),
+    });
+
+    const result = await service.updateSubscription('wh-1', {
+      events: ['order.completed'],
+    });
+
+    expect(result.events).toEqual(['order.completed']);
+  });
+
+  it('should return dead letters for a tenant', async () => {
+    const deadLetters = [
+      {
+        id: 'dl-1',
+        subscription_id: 'wh-1',
+        event_type: 'order.created',
+        payload: { orderId: '123' },
+        error: 'Connection refused',
+        attempts: 3,
+        created_at: new Date(),
+      },
+    ];
+
+    mockDb.select.mockReturnValue({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockResolvedValue([]),
+        innerJoin: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue(deadLetters),
+        }),
+      }),
+    });
+
+    const result = await service.getDeadLetters('tenant-1');
+    expect(result).toEqual(deadLetters);
+    expect(result).toHaveLength(1);
+    expect(result[0].event_type).toBe('order.created');
+  });
+
+  it('should return empty array when no dead letters exist', async () => {
+    // default mock already returns [] for innerJoin path
+    const result = await service.getDeadLetters('tenant-1');
+    expect(result).toEqual([]);
+  });
+
+  it('should get dead letter by id', async () => {
+    const dl = {
+      id: 'dl-1',
+      subscription_id: 'wh-1',
+      event_type: 'order.created',
+      payload: { orderId: '123' },
+      error: 'Timeout',
+      attempts: 3,
+      created_at: new Date(),
+    };
+
+    mockDb.select.mockReturnValue({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockResolvedValue([dl]),
+      }),
+    });
+
+    const result = await service.getDeadLetterById('dl-1');
+    expect(result).toEqual(dl);
+    expect(result.id).toBe('dl-1');
+  });
+
+  it('should throw NotFoundException when dead letter not found', async () => {
+    mockDb.select.mockReturnValue({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockResolvedValue([]),
+      }),
+    });
+
+    await expect(service.getDeadLetterById('nonexistent')).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+
+  it('should delete dead letter by id', async () => {
+    await service.deleteDeadLetter('dl-1');
+    expect(mockDb.delete).toHaveBeenCalled();
+  });
+
+  it('should list multiple subscriptions with correct success rates', async () => {
+    mockDb.select.mockReturnValue({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockResolvedValue([
+          {
+            id: 'wh-1',
+            url: 'https://a.com/hook',
+            events: ['order.created'],
+            is_active: true,
+            delivery_count: 100,
+            success_count: 99,
+            last_delivery_at: new Date(),
+            created_at: new Date(),
+          },
+          {
+            id: 'wh-2',
+            url: 'https://b.com/hook',
+            events: ['*'],
+            is_active: true,
+            delivery_count: 3,
+            success_count: 1,
+            last_delivery_at: new Date(),
+            created_at: new Date(),
+          },
+        ]),
+      }),
+    });
+
+    const result = await service.listSubscriptions('tenant-1');
+    expect(result).toHaveLength(2);
+    expect(result[0].success_rate).toBe(99);
+    expect(result[1].success_rate).toBe(33.33);
+  });
 });
