@@ -1,6 +1,6 @@
 # FoodTech - Real-time Kitchen Operations Platform
 
-[![CI](https://github.com/your-org/foodtech-bmad/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/foodtech-bmad/actions/workflows/ci.yml)
+[![CI](https://github.com/tahatariq/foodtech-bmad/actions/workflows/ci.yml/badge.svg)](https://github.com/tahatariq/foodtech-bmad/actions/workflows/ci.yml)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
