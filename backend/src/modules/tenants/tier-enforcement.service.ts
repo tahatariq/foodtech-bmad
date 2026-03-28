@@ -17,15 +17,13 @@ export class TierEnforcementService {
   ) {}
 
   getTierLimits(tier: SubscriptionTierType): TierLimits {
-    const configLimits = this.configService.get<
-      Record<string, TierLimits>
-    >('tier');
+    const configLimits =
+      this.configService.get<Record<string, TierLimits>>('tier');
     return configLimits?.[tier] ?? DEFAULT_TIER_LIMITS[tier];
   }
 
   async checkLocationLimit(organizationId: string): Promise<void> {
-    const org =
-      await this.repository.findOrganizationById(organizationId);
+    const org = await this.repository.findOrganizationById(organizationId);
     if (!org) throw new ForbiddenException('Organization not found');
 
     const tier = org.subscription_tier as SubscriptionTierType;
@@ -75,8 +73,7 @@ export class TierEnforcementService {
     organizationId: string,
     feature: TierFeatureType,
   ): Promise<boolean> {
-    const org =
-      await this.repository.findOrganizationById(organizationId);
+    const org = await this.repository.findOrganizationById(organizationId);
     if (!org) throw new ForbiddenException('Organization not found');
 
     const tier = org.subscription_tier as SubscriptionTierType;

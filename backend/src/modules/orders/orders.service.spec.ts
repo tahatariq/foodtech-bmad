@@ -21,6 +21,7 @@ describe('OrdersService', () => {
   };
   let mockEventBus: { emit: jest.Mock };
   let mockKitchenStatusService: { decrementByOrderItems: jest.Mock };
+  let mockCustomerTrackerService: { generateTrackingToken: jest.Mock };
 
   beforeEach(() => {
     mockRepository = {
@@ -39,10 +40,14 @@ describe('OrdersService', () => {
     mockKitchenStatusService = {
       decrementByOrderItems: jest.fn().mockResolvedValue(undefined),
     };
+    mockCustomerTrackerService = {
+      generateTrackingToken: jest.fn().mockReturnValue('a'.repeat(64)),
+    };
     service = new OrdersService(
       mockRepository as unknown as import('./orders.repository').OrdersRepository,
       mockEventBus as unknown as import('../../gateways/services/event-bus.service').EventBusService,
       mockKitchenStatusService as unknown as import('../kitchen-status/kitchen-status.service').KitchenStatusService,
+      mockCustomerTrackerService as unknown as import('../customer-tracker/customer-tracker.service').CustomerTrackerService,
     );
   });
 
@@ -114,6 +119,41 @@ describe('OrdersService', () => {
     });
 
     expect(result.items[0].stage).toBe('prep');
+  });
+
+  it('should include trackingUrl in createOrder response', async () => {
+    mockRepository.findStationsByIds.mockResolvedValue([
+      { id: 'station-1', tenant_id: 'tenant-1' },
+    ]);
+    mockRepository.findFirstStage.mockResolvedValue({
+      name: 'received',
+      sequence: 0,
+    });
+    mockRepository.create.mockResolvedValue({
+      order: {
+        id: 'order-1',
+        order_number: 'ORD-T01',
+        status: 'received',
+        created_at: new Date(),
+      },
+      items: [
+        {
+          id: 'item-1',
+          item_name: 'Burger',
+          station_id: 'station-1',
+          stage: 'received',
+          quantity: 1,
+        },
+      ],
+    });
+
+    const result = await service.createOrder('tenant-1', {
+      orderNumber: 'ORD-T01',
+      items: [{ itemName: 'Burger', stationId: 'station-1', quantity: 1 }],
+    });
+
+    expect(result.trackingUrl).toBe(`/track/${'a'.repeat(64)}`);
+    expect(mockCustomerTrackerService.generateTrackingToken).toHaveBeenCalled();
   });
 
   it('should throw when stationId is invalid', async () => {

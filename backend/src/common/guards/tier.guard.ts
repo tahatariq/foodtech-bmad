@@ -32,11 +32,10 @@ export class TierGuard implements CanActivate {
     ]);
     if (isPublic) return true;
 
-    const requiredTier =
-      this.reflector.getAllAndOverride<SubscriptionTierType>(TIER_KEY, [
-        context.getHandler(),
-        context.getClass(),
-      ]);
+    const requiredTier = this.reflector.getAllAndOverride<SubscriptionTierType>(
+      TIER_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (!requiredTier) return true;
 

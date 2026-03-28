@@ -18,22 +18,22 @@ describe('KitchenStatusService', () => {
         {
           provide: KitchenStatusRepository,
           useValue: {
-            createItem: jest.fn(),
-            findAllByTenant: jest.fn(),
-            findById: jest.fn(),
-            updateQuantity: jest.fn(),
-            decrementQuantity: jest.fn(),
-            find86dItems: jest.fn(),
-            findByNames: jest.fn(),
-            createChecklist: jest.fn(),
-            findChecklistByStation: jest.fn(),
-            findChecklistItems: jest.fn(),
-            addChecklistItem: jest.fn(),
-            toggleChecklistItem: jest.fn(),
-            deleteChecklistItem: jest.fn(),
-            getActiveTicketCountByStation: jest.fn(),
-            getOldestTicketAge: jest.fn(),
-            getAllStationsWithStatus: jest.fn(),
+            createItem: jest.fn().mockResolvedValue({}),
+            findAllByTenant: jest.fn().mockResolvedValue([]),
+            findById: jest.fn().mockResolvedValue(null),
+            updateQuantity: jest.fn().mockResolvedValue(undefined),
+            decrementQuantity: jest.fn().mockResolvedValue(undefined),
+            find86dItems: jest.fn().mockResolvedValue([]),
+            findByNames: jest.fn().mockResolvedValue([]),
+            createChecklist: jest.fn().mockResolvedValue({}),
+            findChecklistByStation: jest.fn().mockResolvedValue(null),
+            findChecklistItems: jest.fn().mockResolvedValue([]),
+            addChecklistItem: jest.fn().mockResolvedValue({}),
+            toggleChecklistItem: jest.fn().mockResolvedValue(undefined),
+            deleteChecklistItem: jest.fn().mockResolvedValue(undefined),
+            getActiveTicketCountByStation: jest.fn().mockResolvedValue(0),
+            getOldestTicketAge: jest.fn().mockResolvedValue(null),
+            getAllStationsWithStatus: jest.fn().mockResolvedValue([]),
           },
         },
         {
@@ -57,15 +57,16 @@ describe('KitchenStatusService', () => {
         currentQuantity: 20,
         reorderThreshold: 5,
       };
-      const created = {
+      repository.createItem.mockResolvedValue({
         id: 'item-1',
         item_name: 'Salmon',
         current_quantity: 20,
         reorder_threshold: 5,
         is_86d: false,
         tenant_id: tenantId,
-      };
-      repository.createItem.mockResolvedValue(created as any);
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
 
       const result = await service.createItem(tenantId, dto);
 
@@ -74,17 +75,46 @@ describe('KitchenStatusService', () => {
         current_quantity: 20,
         reorder_threshold: 5,
       });
-      expect(result).toEqual(created);
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: 'item-1',
+          item_name: 'Salmon',
+          current_quantity: 20,
+          reorder_threshold: 5,
+          is_86d: false,
+          tenant_id: tenantId,
+        }),
+      );
     });
   });
 
   describe('findAll', () => {
     it('should return all items for tenant', async () => {
       const items = [{ id: 'item-1', item_name: 'Salmon' }];
-      repository.findAllByTenant.mockResolvedValue(items as any);
+      repository.findAllByTenant.mockResolvedValue([
+        {
+          id: 'item-1',
+          item_name: 'Salmon',
+          current_quantity: 20,
+          reorder_threshold: 5,
+          is_86d: false,
+          tenant_id: tenantId,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ]);
 
       const result = await service.findAll(tenantId);
-      expect(result).toEqual(items);
+      expect(result).toEqual([
+        expect.objectContaining({
+          id: 'item-1',
+          item_name: 'Salmon',
+          current_quantity: 20,
+          reorder_threshold: 5,
+          is_86d: false,
+          tenant_id: tenantId,
+        }),
+      ]);
     });
   });
 

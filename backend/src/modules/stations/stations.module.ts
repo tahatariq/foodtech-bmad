@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
-import { StationsController, OrderStagesController } from './stations.controller';
+import {
+  StationsController,
+  OrderStagesController,
+} from './stations.controller';
 import { StationsService } from './stations.service';
 import { StationsRepository } from './stations.repository';
 import { DatabaseModule } from '../../database/database.module';

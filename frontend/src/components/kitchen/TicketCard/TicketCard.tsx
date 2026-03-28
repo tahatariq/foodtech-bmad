@@ -34,7 +34,7 @@ export function TicketCard({
   eightySixedItems,
   offlineQueued = false,
 }: TicketCardProps) {
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);

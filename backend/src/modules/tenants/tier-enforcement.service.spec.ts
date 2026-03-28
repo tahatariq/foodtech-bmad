@@ -85,9 +85,7 @@ describe('TierEnforcementService', () => {
       });
       mockRepository.countActiveStaffByLocation.mockResolvedValue(100);
 
-      await expect(
-        service.checkStaffLimit('loc-1'),
-      ).resolves.toBeUndefined();
+      await expect(service.checkStaffLimit('loc-1')).resolves.toBeUndefined();
     });
   });
 
@@ -109,10 +107,7 @@ describe('TierEnforcementService', () => {
         subscription_tier: 'enterprise',
       });
 
-      const result = await service.checkFeatureAccess(
-        'org-1',
-        'SUPPLIER_API',
-      );
+      const result = await service.checkFeatureAccess('org-1', 'SUPPLIER_API');
       expect(result).toBe(true);
     });
   });

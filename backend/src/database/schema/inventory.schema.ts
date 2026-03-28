@@ -69,7 +69,5 @@ export const checklistItems = pgTable(
     completed_by: text('completed_by').references(() => users.id),
     ...timestamps(),
   },
-  (table) => [
-    index('idx_checklist_items_checklist_id').on(table.checklist_id),
-  ],
+  (table) => [index('idx_checklist_items_checklist_id').on(table.checklist_id)],
 );

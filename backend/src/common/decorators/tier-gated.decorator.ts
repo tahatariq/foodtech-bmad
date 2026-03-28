@@ -23,15 +23,10 @@ export function TierGated(
     target: object,
     key?: string | symbol,
     descriptor?: TypedPropertyDescriptor<unknown>,
-  ) => {
+  ): void => {
     SetMetadata(TIER_KEY, minimumTier)(target, key!, descriptor!);
     if (options?.feature) {
-      SetMetadata(TIER_FEATURE_KEY, options.feature)(
-        target,
-        key!,
-        descriptor!,
-      );
+      SetMetadata(TIER_FEATURE_KEY, options.feature)(target, key!, descriptor!);
     }
-    return descriptor ?? target;
   };
 }

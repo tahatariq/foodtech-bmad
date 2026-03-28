@@ -51,15 +51,21 @@ export function ConnectionIndicator({ status }: ConnectionIndicatorProps) {
 
   useEffect(() => {
     if (status === 'connected' || status === 'reconnecting') {
-      const interval = setInterval(() => {
-        if (lastSyncTimestamp) {
+      if (lastSyncTimestamp) {
+        const sinceLast = Date.now() - new Date(lastSyncTimestamp).getTime();
+        setIsStale(sinceLast >= STALE_THRESHOLD_MS);
+        
+        const interval = setInterval(() => {
           const sinceLast = Date.now() - new Date(lastSyncTimestamp).getTime();
           setIsStale(sinceLast >= STALE_THRESHOLD_MS);
-        }
-      }, 1000);
-      return () => clearInterval(interval);
+        }, 1000);
+        return () => clearInterval(interval);
+      } else {
+        setIsStale(false);
+      }
+    } else {
+      setIsStale(false);
     }
-    setIsStale(false);
   }, [status, lastSyncTimestamp]);
 
   // Determine effective display state

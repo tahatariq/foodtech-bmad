@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SocketProvider, useSocketContext } from './SocketProvider';
+import { SocketProvider } from './SocketProvider';
+import { useSocketContext } from '../hooks/useSocketContext';
 
 vi.mock('socket.io-client', () => ({
   io: vi.fn().mockReturnValue({

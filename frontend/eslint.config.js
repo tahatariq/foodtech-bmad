@@ -13,11 +13,26 @@ export default defineConfig([
       js.configs.recommended,
       tseslint.configs.recommended,
       reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
     ],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+  },
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    extends: [reactRefresh.configs.vite],
+  },
+  {
+    files: ['src/router.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
+    files: ['src/components/ConnectionIndicator.tsx', 'src/providers/SocketProvider.tsx'],
+    rules: {
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
 ])

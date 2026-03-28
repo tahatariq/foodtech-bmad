@@ -5,10 +5,14 @@ import {
   Param,
   Body,
   Query,
+  Res,
   UsePipes,
   HttpCode,
   HttpStatus,
+  NotFoundException,
 } from '@nestjs/common';
+import type { Response } from 'express';
+import * as QRCode from 'qrcode';
 import { OrdersService } from './orders.service';
 import { CurrentUser, TenantScoped, Roles } from '../../common/decorators';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
@@ -66,5 +70,27 @@ export class OrdersController {
     @Param('orderId') orderId: string,
   ) {
     return this.service.revertOrder(tenantId, orderId);
+  }
+
+  @Get(':orderId/qr')
+  @Roles('line_cook', 'head_chef', 'location_manager')
+  async getOrderQr(
+    @CurrentUser('tenantId') tenantId: string,
+    @Param('orderId') orderId: string,
+    @Res() res: Response,
+  ) {
+    const order = await this.service.getOrderTrackingUrl(tenantId, orderId);
+    if (!order) {
+      throw new NotFoundException({
+        type: 'https://foodtech.app/errors/not-found',
+        title: 'Order Not Found',
+        status: 404,
+        detail: `Order ${orderId} not found.`,
+      });
+    }
+
+    const buffer = await QRCode.toBuffer(order.trackingUrl, { type: 'png' });
+    res.set('Content-Type', 'image/png');
+    res.send(buffer);
   }
 }

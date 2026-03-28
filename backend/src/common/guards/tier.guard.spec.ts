@@ -13,16 +13,10 @@ describe('TierGuard', () => {
   };
 
   function setupDb(tier: string | null) {
-    const mockLimit = jest.fn().mockResolvedValue(
-      tier ? [{ tier }] : [],
-    );
+    const mockLimit = jest.fn().mockResolvedValue(tier ? [{ tier }] : []);
     const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
-    const mockInnerJoin = jest
-      .fn()
-      .mockReturnValue({ where: mockWhere });
-    const mockFrom = jest
-      .fn()
-      .mockReturnValue({ innerJoin: mockInnerJoin });
+    const mockInnerJoin = jest.fn().mockReturnValue({ where: mockWhere });
+    const mockFrom = jest.fn().mockReturnValue({ innerJoin: mockInnerJoin });
     mockDb = {
       select: jest.fn().mockReturnValue({ from: mockFrom }),
     };
@@ -130,9 +124,7 @@ describe('TierGuard', () => {
         string,
         unknown
       >;
-      expect(response.type).toBe(
-        'https://foodtech.app/errors/tier-restricted',
-      );
+      expect(response.type).toBe('https://foodtech.app/errors/tier-restricted');
       expect(response.detail).toContain('growth');
       expect(response.detail).toContain('indie');
     }

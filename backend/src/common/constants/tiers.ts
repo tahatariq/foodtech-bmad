@@ -18,8 +18,7 @@ export function meetsMinimumTier(
   requiredTier: SubscriptionTierType,
 ): boolean {
   return (
-    TIER_HIERARCHY.indexOf(currentTier) >=
-    TIER_HIERARCHY.indexOf(requiredTier)
+    TIER_HIERARCHY.indexOf(currentTier) >= TIER_HIERARCHY.indexOf(requiredTier)
   );
 }
 
@@ -31,8 +30,7 @@ export const TierFeature = {
   UNLIMITED_STAFF: 'UNLIMITED_STAFF',
 } as const;
 
-export type TierFeatureType =
-  (typeof TierFeature)[keyof typeof TierFeature];
+export type TierFeatureType = (typeof TierFeature)[keyof typeof TierFeature];
 
 export interface TierLimits {
   maxLocations: number;

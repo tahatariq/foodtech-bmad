@@ -13,6 +13,20 @@ const ExpeditorDashboard = lazy(
     })),
 );
 
+const CustomerTracker = lazy(
+  () =>
+    import('./views/customer/CustomerTracker').then((m) => ({
+      default: m.CustomerTracker,
+    })),
+);
+
+const DeliveryBoard = lazy(
+  () =>
+    import('./views/delivery/DeliveryBoard').then((m) => ({
+      default: m.DeliveryBoard,
+    })),
+);
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -27,6 +41,22 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<div>Loading...</div>}>
         <ExpeditorDashboard />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/track/:token',
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <CustomerTracker />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/delivery',
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <DeliveryBoard />
       </Suspense>
     ),
   },

@@ -14,10 +14,7 @@ export class StationsRepository {
     display_order: number;
     tenant_id: string;
   }) {
-    const result = await this.db
-      .insert(stations)
-      .values(data)
-      .returning();
+    const result = await this.db.insert(stations).values(data).returning();
     return result[0];
   }
 
@@ -57,10 +54,7 @@ export class StationsRepository {
       .select()
       .from(orderStages)
       .where(
-        and(
-          eq(orderStages.id, stageId),
-          eq(orderStages.tenant_id, tenantId),
-        ),
+        and(eq(orderStages.id, stageId), eq(orderStages.tenant_id, tenantId)),
       )
       .limit(1);
     return result[0] ?? null;

@@ -5,17 +5,24 @@ import { orders } from '../../database/schema/orders.schema';
 import { orderItems } from '../../database/schema/orders.schema';
 import { orderStages } from '../../database/schema/orders.schema';
 import { stations } from '../../database/schema/stations.schema';
+import type { OrderStatus } from '@foodtech/shared-types';
 
 @Injectable()
 export class OrdersRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
 
   async create(
-    order: { order_number: string; status: string; tenant_id: string },
+    order: {
+      order_number: string;
+      status: OrderStatus;
+      tenant_id: string;
+      tracking_token?: string;
+      tracking_token_expires_at?: Date;
+    },
     items: {
       item_name: string;
       station_id: string;
-      stage: string;
+      stage: OrderStatus;
       quantity: number;
       tenant_id: string;
     }[],
@@ -81,35 +88,22 @@ export class OrdersRepository {
       .orderBy(orderStages.sequence);
   }
 
-  async updateItemStage(itemId: string, stage: string, stageEnteredAt?: Date) {
+  async updateItemStage(
+    itemId: string,
+    stage: OrderStatus,
+    stageEnteredAt?: Date,
+  ) {
     return this.db
       .update(orderItems)
       .set({
-        stage: stage as
-          | 'received'
-          | 'preparing'
-          | 'plating'
-          | 'served'
-          | 'completed'
-          | 'cancelled',
+        stage,
         ...(stageEnteredAt ? { stage_entered_at: stageEnteredAt } : {}),
       })
       .where(eq(orderItems.id, itemId));
   }
 
-  async updateOrderStatus(orderId: string, status: string) {
-    return this.db
-      .update(orders)
-      .set({
-        status: status as
-          | 'received'
-          | 'preparing'
-          | 'plating'
-          | 'served'
-          | 'completed'
-          | 'cancelled',
-      })
-      .where(eq(orders.id, orderId));
+  async updateOrderStatus(orderId: string, status: OrderStatus) {
+    return this.db.update(orders).set({ status }).where(eq(orders.id, orderId));
   }
 
   async reassignOrderItems(orderId: string, targetStationId: string) {

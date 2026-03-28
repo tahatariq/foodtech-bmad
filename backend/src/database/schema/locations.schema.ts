@@ -12,6 +12,7 @@ export const locations = pgTable(
     name: text('name').notNull(),
     address: text('address'),
     timezone: text('timezone').notNull().default('UTC'),
+    api_key: text('api_key'),
     is_active: isActiveColumn(),
     ...timestamps(),
   },

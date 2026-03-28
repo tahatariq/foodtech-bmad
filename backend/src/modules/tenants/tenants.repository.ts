@@ -45,7 +45,10 @@ export class TenantsRepository {
       .select({ value: count() })
       .from(locations)
       .where(
-        and(eq(locations.organization_id, orgId), eq(locations.is_active, true)),
+        and(
+          eq(locations.organization_id, orgId),
+          eq(locations.is_active, true),
+        ),
       );
     return result[0]?.value ?? 0;
   }

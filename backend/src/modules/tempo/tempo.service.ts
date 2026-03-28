@@ -31,7 +31,17 @@ export class TempoService {
     return 'red';
   }
 
-  async calculateTempo(tenantId: string, target: number = DEFAULT_TARGET) {
+  async calculateTempo(
+    tenantId: string,
+    target: number = DEFAULT_TARGET,
+  ): Promise<{
+    tempoValue: number;
+    status: TempoStatus;
+    stationBreakdown: StationTempo[];
+    bottleneckStationIds: string[];
+    target: number;
+    calculatedAt: string;
+  }> {
     const activeItems = await this.repository.getActiveOrderItems(tenantId);
 
     if (activeItems.length === 0) {
@@ -39,6 +49,7 @@ export class TempoService {
         tempoValue: 0,
         status: 'green' as TempoStatus,
         stationBreakdown: [],
+        bottleneckStationIds: [],
         target,
         calculatedAt: new Date().toISOString(),
       };

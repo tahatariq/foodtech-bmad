@@ -1,6 +1,5 @@
 import {
   createContext,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -22,9 +21,7 @@ const SocketContext = createContext<SocketContextValue>({
   socket: null,
 });
 
-export function useSocketContext() {
-  return useContext(SocketContext);
-}
+export { SocketContext };
 
 const processedEvents = new Set<string>();
 
@@ -35,14 +32,23 @@ function cleanupProcessedEvents() {
 export function SocketProvider({ children }: { children: ReactNode }) {
   const [connectionState, setConnectionState] =
     useState<ConnectionState>('offline');
+  const [socket, setSocket] = useState<Socket | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const queryClient = useQueryClient();
   const { accessToken, tenantId, stationId } = useAuthStore();
 
   useEffect(() => {
-    if (!accessToken || !tenantId) return;
+    if (!accessToken || !tenantId) {
+      if (socketRef.current) {
+        socketRef.current.removeAllListeners();
+        socketRef.current.disconnect();
+        socketRef.current = null;
+        setSocket(null);
+      }
+      return;
+    }
 
-    const socket = io(`/tenant-${tenantId}`, {
+    const newSocket = io(`/tenant-${tenantId}`, {
       auth: { token: accessToken },
       transports: ['websocket'],
       reconnection: true,
@@ -50,7 +56,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       reconnectionDelayMax: 5000,
     });
 
-    socketRef.current = socket;
+    socketRef.current = newSocket;
+    setSocket(newSocket);
+
+    const socket = socketRef.current;
+    if (!socket) return;
 
     socket.on('connect', () => {
       setConnectionState('connected');
@@ -124,15 +134,18 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     return () => {
       clearInterval(cleanupInterval);
-      socket.removeAllListeners();
-      socket.disconnect();
+      if (socket) {
+        socket.removeAllListeners();
+        socket.disconnect();
+      }
       socketRef.current = null;
+      setSocket(null);
     };
-  }, [accessToken, tenantId, stationId, queryClient]);
+  }, [accessToken, tenantId, stationId, queryClient]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <SocketContext.Provider
-      value={{ connectionState, socket: socketRef.current }}
+      value={{ connectionState, socket }}
     >
       {children}
     </SocketContext.Provider>

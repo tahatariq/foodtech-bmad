@@ -7,7 +7,9 @@ import {
 import { OrdersRepository } from './orders.repository';
 import { EventBusService } from '../../gateways/services/event-bus.service';
 import { KitchenStatusService } from '../kitchen-status/kitchen-status.service';
+import { CustomerTrackerService } from '../customer-tracker/customer-tracker.service';
 import type { CreateOrderDto } from './dto/create-order.dto';
+import type { OrderStatus } from '@foodtech/shared-types';
 import { ORDER_EVENTS } from '@foodtech/shared-types';
 
 const CONSUMPTION_STAGE = 'preparing';
@@ -18,6 +20,7 @@ export class OrdersService {
     private readonly repository: OrdersRepository,
     private readonly eventBus: EventBusService,
     private readonly kitchenStatusService: KitchenStatusService,
+    private readonly customerTrackerService: CustomerTrackerService,
   ) {}
 
   async createOrder(tenantId: string, dto: CreateOrderDto) {
@@ -41,16 +44,21 @@ export class OrdersService {
     const firstStage = await this.repository.findFirstStage(tenantId);
     const initialStage = firstStage?.name ?? 'received';
 
+    const trackingToken = this.customerTrackerService.generateTrackingToken();
+    const trackingTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
     const result = await this.repository.create(
       {
         order_number: dto.orderNumber,
         status: 'received',
         tenant_id: tenantId,
+        tracking_token: trackingToken,
+        tracking_token_expires_at: trackingTokenExpiresAt,
       },
       dto.items.map((item) => ({
         item_name: item.itemName,
         station_id: item.stationId,
-        stage: initialStage,
+        stage: initialStage as OrderStatus,
         quantity: item.quantity,
         tenant_id: tenantId,
       })),
@@ -89,6 +97,7 @@ export class OrdersService {
       })),
       createdAt: result.order.created_at,
       stageEnteredAt: result.order.created_at,
+      trackingUrl: `/track/${trackingToken}`,
     };
   }
 
@@ -130,7 +139,7 @@ export class OrdersService {
         const stageEnteredAt = new Date();
         await this.repository.updateItemStage(
           item.id,
-          nextStage,
+          nextStage as OrderStatus,
           stageEnteredAt,
         );
         updatedItems.push({
@@ -323,7 +332,11 @@ export class OrdersService {
         continue;
       }
       const previousStage = stageNames[currentIdx - 1];
-      await this.repository.updateItemStage(item.id, previousStage, new Date());
+      await this.repository.updateItemStage(
+        item.id,
+        previousStage as OrderStatus,
+        new Date(),
+      );
       revertedItems.push({
         ...item,
         stage: previousStage,
@@ -332,7 +345,7 @@ export class OrdersService {
     }
 
     // If order was completed, revert to active
-    if (order.status === 'completed') {
+    if ((order.status as OrderStatus) === 'completed') {
       await this.repository.updateOrderStatus(orderId, 'received');
     }
 
@@ -366,5 +379,11 @@ export class OrdersService {
         quantity: i.quantity,
       })),
     };
+  }
+
+  async getOrderTrackingUrl(tenantId: string, orderId: string) {
+    const order = await this.repository.findOrderById(orderId, tenantId);
+    if (!order || !order.tracking_token) return null;
+    return { trackingUrl: `/track/${order.tracking_token}` };
   }
 }
